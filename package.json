@@ -1,7 +1,7 @@
 {
   "name": "keen-mind",
   "version": "1.0.0",
-  "description": "Discord bot for looking up spells, monsters, and more from D&D 5e",
+  "description": "Discord bot for looking up spells, monsters, weapons, and more from D&D 5e",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

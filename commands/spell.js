@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const ordinal = require('../utils/ordinals');
 const {indexify, sluggify} = require('../utils/sluggify');
 const {PURPLE} = require('../utils/colors');
+const usage = require('../replies/usage');
 
 /**
  * Unabbreviates spell component requirements
@@ -33,11 +34,13 @@ async function getSpellDetails(matchedSpell) {
 	}
 	if (spell.area_of_effect) {
 		const {type, size} = spell.area_of_effect;
-		fields.push({name: 'Area of Effect', value: `${size}-ft. ${type}`, inline: true});
+		fields.push({name: 'Area of Effect', value: `${size}-ft ${type}`, inline: true});
 	}
 	if (spell.higher_level) fields.push({name: 'At Higher Levels', value: spell.higher_level});
 
-	const subtitle = `***${ordinal(spell.level)} level ${spell.school.name}***`;
+	const spellLevel = spell.level === 0 ? 'Cantrip' : `${ordinal(spell.level)} Level`;
+	const subtitle = `***${spellLevel} · ${spell.school.name}***`;
+
 	const spellDescription = Array.isArray(spell.desc) ? spell.desc.join('\n\n') : spell.desc;
 	let embedDescription = `${subtitle}\n\n${spellDescription}`;
 	if (embedDescription.length > 2048) {
@@ -58,6 +61,11 @@ module.exports = {
 	name: 'spell',
 	description: 'Find a spell!',
 	async execute(message, args) {
+		if (!args || args.length === 0) {
+			usage(message, 'spell', '!spell <partial or full spell name>');
+			return;
+		}
+
 		const fullName = args.join(' ');
 		const query = sluggify(args);
 		const spells = await fetch(`https://www.dnd5eapi.co/api/spells?name=${query}`)
@@ -79,7 +87,8 @@ module.exports = {
 				spellDetails.footer = {text: `---\nI also found:\n${alternatives}`};
 			}
 
-			message.channel.send({embed: spellDetails});
+			const reply = await message.channel.send({embed: spellDetails});
+			if (index === 'fireball') reply.react('🔥');
 		} else if (spells.count === 1) {
 			const bestGuess = spells.results[0];
 			const spellDetails = await getSpellDetails(bestGuess);
