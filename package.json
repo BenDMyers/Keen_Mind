@@ -1,0 +1,21 @@
+{
+  "name": "keen-mind",
+  "version": "1.0.0",
+  "description": "Discord bot for looking up spells, monsters, and more from D&D 5e",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "Ben Myers <ben@benmyers.dev>",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.3.1",
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.10.0",
+    "nodemon": "^2.0.4"
+  }
+}
