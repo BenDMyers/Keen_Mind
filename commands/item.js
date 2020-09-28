@@ -40,6 +40,15 @@ async function getAdventuringGearDetails(gear) {
 		fields.push({name: 'Weight', value: `${gear.weight} lbs`, inline: true});
 	}
 
+	if (gear.speed) {
+		const speed = [];
+		if (gear.speed.quantity) speed.push(gear.speed.quantity);
+		if (gear.speed.unit) speed.push(gear.speed.unit);
+		fields.push({name: 'Speed', value: speed.join(' '), inline: true});
+	}
+
+	if (gear.capacity) fields.push({name: 'Capacity', value: gear.capacity, inline: true});
+
 	let subtitle = 'Adventuring Gear';
 	if (gear.equipment_category) {
 		switch(gear.equipment_category.index) {
@@ -48,6 +57,9 @@ async function getAdventuringGearDetails(gear) {
 				break;
 			case 'adventuring-gear':
 				subtitle = (gear.gear_category && gear.gear_category.name) || gear.equipment_category.name || subtitle;
+				break;
+			case 'mounts-and-vehicles':
+				subtitle = gear.vehicle_category || gear.equipment_category.name || subtitle;
 				break;
 			default:
 				break;
