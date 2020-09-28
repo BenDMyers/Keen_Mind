@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const usage = require('../replies/usage');
-const {YELLOW} = require('../utils/colors');
+const {YELLOW, GRAY} = require('../utils/colors');
 const {indexify, sluggify} = require('../utils/sluggify');
 
 const filteredOutProperties = ['monk', 'special'];
@@ -26,9 +26,60 @@ async function getItemDetails(matchedItem) {
 	}
 }
 
-function getAdventuringGearDetails(gear) {
-	const embed = {};
-	return embed;
+async function getAdventuringGearDetails(gear) {
+	const fields = [];
+
+	if (gear.cost) {
+		const cost = [];
+		if (gear.cost.quantity) cost.push(gear.cost.quantity);
+		if (gear.cost.unit) cost.push(gear.cost.unit);
+		fields.push({name: 'Cost', value: cost.join(' '), inline: true});
+	}
+
+	if (gear.weight) {
+		fields.push({name: 'Weight', value: `${gear.weight} lbs`, inline: true});
+	}
+
+	let subtitle = 'Adventuring Gear';
+	if (gear.equipment_category) {
+		switch(gear.equipment_category.index) {
+			case 'tools':
+				subtitle = gear.tool_category || gear.equipment_category.name || subtitle;
+				break;
+			case 'adventuring-gear':
+				subtitle = (gear.gear_category && gear.gear_category.name) || gear.equipment_category.name || subtitle;
+				break;
+			default:
+				break;
+		}
+	}
+	let desc = `***${subtitle}***`;
+
+	if (gear.desc) {
+		const description = Array.isArray(gear.desc) ?
+			gear.desc.join('\n\n') :
+			gear.desc;
+
+		desc += `\n\n${description}`;
+	}
+
+	if (gear.contents && gear.contents.length) {
+		const response = await fetch('https://www.dnd5eapi.co/api/equipment/').then(res => res.json());
+		const allItems = response.results;
+		const contentsList = gear.contents.map((content) => {
+			const {name} = allItems.find(item => item.url === content.item_url);
+			return `${content.quantity}x ${name}`;
+		});
+		desc += `\n\n${contentsList.join('\n')}`;
+	}
+
+	const details = {
+		color: GRAY,
+		title: gear.name,
+		description: desc,
+		fields
+	};
+	return details;
 }
 
 function getArmorDetails(armor) {

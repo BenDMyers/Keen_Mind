@@ -5,5 +5,6 @@ module.exports = {
 	PINK: 0xFD0061,
 	YELLOW: 0xF8C300,
 	RED: 0xF93A2F,
-	ORANGE: 0xCC7900
+	ORANGE: 0xCC7900,
+	GRAY: 0x597e8d
 };
