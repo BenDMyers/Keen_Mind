@@ -3,9 +3,11 @@ const usage = require('../replies/usage');
 const {YELLOW} = require('../utils/colors');
 const {indexify, sluggify} = require('../utils/sluggify');
 
+const filteredOutProperties = ['monk', 'special'];
+
 function formatProperties(properties) {
 	return properties
-		.filter(prop => prop.index !== 'monk')
+		.filter(prop => !filteredOutProperties.includes(prop.index))
 		.map(prop => prop.name)
 		.join(', ');
 }
@@ -74,7 +76,10 @@ function getWeaponDetails(weapon) {
 		fields.push({name: 'Weight', value: `${weapon.weight} lbs`, inline: true});
 	}
 
-	fields.push({name: 'Properties', value: formatProperties(weapon.properties), inline: true});
+	if (weapon.properties && weapon.properties.length) {
+		const formatted = formatProperties(weapon.properties);
+		if (formatted) fields.push({name: 'Properties', value: formatted, inline: true});
+	}
 
 	let desc = `***${weapon.category_range} Weapon***`;
 	if (weapon.special) {
