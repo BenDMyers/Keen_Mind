@@ -62,7 +62,7 @@ function getWeaponDetails(weapon) {
 		if (weapon.throw_range.long) {
 			thrownRange += `/${weapon.throw_range.long} ft`;
 		}
-		fields.push({name: 'Throw Range', value: thrownRange, inline: true});
+		if (thrownRange !== range) fields.push({name: 'Throw Range', value: thrownRange, inline: true});
 	}
 
 	if (weapon.cost) {
@@ -76,10 +76,21 @@ function getWeaponDetails(weapon) {
 
 	fields.push({name: 'Properties', value: formatProperties(weapon.properties), inline: true});
 
+	let desc = `***${weapon.category_range} Weapon***`;
+	if (weapon.special) {
+		let specialDescription = Array.isArray(weapon.special) ?
+			weapon.special.join('\n\n') :
+			weapon.special;
+		if (specialDescription.length > 2000) {
+			specialDescription = specialDescription.substr(0, 2000) + '…';
+		}
+		desc += `\n\n${specialDescription}`;
+	}
+
 	const details = {
 		color: YELLOW,
 		title: weapon.name,
-		description: `***${weapon.category_range} Weapon***`,
+		description: desc,
 		fields
 	};
 	return details;
