@@ -4,6 +4,8 @@ const {indexify, sluggify} = require('../utils/sluggify');
 const {PURPLE} = require('../utils/colors');
 const usage = require('../replies/usage');
 
+const placeholderDetail = {name: '\u200B', value: '\u200B', inline: true};
+
 /**
  * Unabbreviates spell component requirements
  * @param {[String]} components An array of any and all of ['V', 'S', 'M']
@@ -46,6 +48,10 @@ async function getSpellDetails(matchedSpell) {
 		const classes = spell.classes.map(cls => cls.name);
 		const formattedClasses = classes.join(', ');
 		fields.push({name: 'Classes', value: formattedClasses, inline: true});
+	}
+
+	if (fields.length % 3 === 2) {
+		fields.push(placeholderDetail);
 	}
 
 	const spellLevel = spell.level === 0 ? 'Cantrip' : `${ordinal(spell.level)} Level`;

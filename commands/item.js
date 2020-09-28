@@ -1,9 +1,11 @@
 const fetch = require('node-fetch');
 const usage = require('../replies/usage');
-const {YELLOW, GRAY} = require('../utils/colors');
+const {YELLOW, GRAY, BLUE} = require('../utils/colors');
 const {indexify, sluggify} = require('../utils/sluggify');
 
 const filteredOutProperties = ['monk', 'special'];
+const armorCategories = ['Heavy', 'Medium', 'Light']; // for armor-armor, not shields and such
+const placeholderDetail = {name: '\u200B', value: '\u200B', inline: true};
 
 function formatProperties(properties) {
 	return properties
@@ -95,7 +97,61 @@ async function getAdventuringGearDetails(gear) {
 }
 
 function getArmorDetails(armor) {
-	const details = {};
+	const fields = [];
+
+	if (armor.armor_class && armor.armor_class.base) {
+		let ac = armor.armor_class.base;
+		if (armor.armor_category === 'Shield') {
+			ac = `+${ac}`;
+		}
+
+		if (armor.armor_class.dex_bonus) {
+			let dexBonus = ' + DEX';
+			if (armor.armor_class.max_bonus) dexBonus += ` (max +${armor.armor_class.max_bonus})`;
+			ac += dexBonus;
+		}
+		fields.push({name: 'Armor Class', value: ac, inline: true});
+	}
+
+	if (armor.str_minimum) fields.push({name: 'Min Strength', value: armor.str_minimum, inline: true});
+	if (armor.stealth_disadvantage) fields.push({name: 'Stealth', value: 'Disadvantage', inline: true});
+
+	if (armor.cost) {
+		const cost = [];
+		if (armor.cost.quantity) cost.push(armor.cost.quantity);
+		if (armor.cost.unit) cost.push(armor.cost.unit);
+		fields.push({name: 'Cost', value: cost.join(' '), inline: true});
+	}
+
+	if (armor.weight) {
+		fields.push({name: 'Weight', value: `${armor.weight} lbs`, inline: true});
+	}
+
+	let desc = armor.armor_category;
+	if (armorCategories.includes(armor.armor_category)) {
+		desc += ' Armor';
+	}
+	desc = `***${desc}***`;
+
+	if (armorCategories.includes(armor.armor_category)) {
+		desc += '\n\nAnyone can put on a suit of armor or strap a Shield to an arm. Only those proficient in the armor’s use know how to wear it effectively, however. Your class gives you proficiency with certain types of armor. If you wear armor that you lack proficiency with, you have disadvantage on any ability check, saving throw, or Attack roll that involves Strength or Dexterity, and you can’t cast Spells.';
+	}
+
+	if (armor.armor_category === 'Heavy') {
+		desc += '\n\nHeavier armor interferes with the wearer’s ability to move quickly, stealthily, and freely. If the Armor table shows “Str 13” or “Str 15” in the Strength column for an armor type, the armor reduces the wearer’s speed by 10 feet unless the wearer has a Strength score equal to or higher than the listed score.';
+	}
+
+	if (armor.armor_category === 'Shield') {
+		desc += '\n\nA Shield is made from wood or metal and is carried in one hand. Wielding a Shield increases your Armor Class by 2. You can benefit from only one Shield at a time.';
+	}
+
+	const details = {
+		color: BLUE,
+		title: armor.name,
+		description: desc,
+		fields
+	};
+
 	return details;
 }
 
@@ -196,11 +252,19 @@ module.exports = {
 				itemDetails.footer = {text: `---\nI also found:\n${alternatives}`};
 			}
 
+			if (itemDetails.fields.length % 3 === 2) {
+				itemDetails.fields.push(placeholderDetail);
+			}
+
 			message.channel.send({embed: itemDetails});
 		} else if (items.count === 1) {
 			const bestGuess = items.results[0];
 			const itemDetails = await getItemDetails(bestGuess);
 			itemDetails.footer = {text: '---\nThis was my best guess! Feel free to search again!'};
+
+			if (itemDetails.fields.length % 3 === 2) {
+				itemDetails.fields.push(placeholderDetail);
+			}
 
 			message.channel.send({embed: itemDetails});
 		} else {
