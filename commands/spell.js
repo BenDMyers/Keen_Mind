@@ -28,15 +28,25 @@ async function getSpellDetails(matchedSpell) {
 	if (spell.components) fields.push({name: 'Components', value: formatComponents(spell.components), inline: true});
 	if (spell.duration) fields.push({name: 'Duration', value: spell.duration, inline: true});
 	if (spell.damage) {
-		const damageDice = spell.damage.damage_at_slot_level[spell.level];
-		const damageType = spell.damage.damage_type.name;
-		fields.push({name: 'Damage', value: `${damageDice} ${damageType}`, inline: true});
+		const damage = [];
+		if (spell.damage.damage_at_slot_level) {
+			damage.push(spell.damage.damage_at_slot_level[spell.level]);
+		}
+		if (spell.damage.damage_type && spell.damage.damage_type.name) {
+			damage.push(spell.damage.damage_type.name);
+		}
+		fields.push({name: 'Damage', value: damage.join(' '), inline: true});
 	}
 	if (spell.area_of_effect) {
 		const {type, size} = spell.area_of_effect;
 		fields.push({name: 'Area of Effect', value: `${size}-ft ${type}`, inline: true});
 	}
 	if (spell.higher_level) fields.push({name: 'At Higher Levels', value: spell.higher_level});
+	if (spell.classes && spell.classes.length) {
+		const classes = spell.classes.map(cls => cls.name);
+		const formattedClasses = classes.join(', ');
+		fields.push({name: 'Classes', value: formattedClasses, inline: true});
+	}
 
 	const spellLevel = spell.level === 0 ? 'Cantrip' : `${ordinal(spell.level)} Level`;
 	const subtitle = `***${spellLevel} · ${spell.school.name}***`;

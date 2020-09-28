@@ -37,8 +37,14 @@ function getArmorDetails(armor) {
 function getWeaponDetails(weapon) {
 	const fields = [];
 
-	const damage = `${weapon.damage.damage_dice} ${weapon.damage.damage_type.name}`;
-	fields.push({name: 'Damage', value: damage, inline: true});
+	if (weapon.damage) {
+		const damage = [];
+		if (weapon.damage.damage_dice) damage.push(weapon.damage.damage_dice);
+		if (weapon.damage.damage_type && weapon.damage.damage_type.name) {
+			damage.push(weapon.damage.damage_type.name);
+		}
+		fields.push({name: 'Damage', value: damage.join(' '), inline: true});
+	}
 
 	if (weapon['2h_damage']) {
 		const twoHandedDamage = `${weapon['2h_damage'].damage_dice} ${weapon['2h_damage'].damage_type.name}`;
