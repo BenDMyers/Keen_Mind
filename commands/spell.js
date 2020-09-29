@@ -20,6 +20,11 @@ function formatComponents(components) {
 	return fullNames.join(', ');
 }
 
+/**
+ * Fetch a spell's complete details and convert it into a Discord Embed object
+ * @param {{index: String, name: String, url: String}} matchedSpell Reduced representation of a spell returned from the /spells endpoint
+ * @returns {Promise<{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}>} the Discord Embed object to use in the response
+ */
 async function getSpellDetails(matchedSpell) {
 	const {url} = matchedSpell;
 	const spell = await fetch(`https://www.dnd5eapi.co${url}`).then(res => res.json());

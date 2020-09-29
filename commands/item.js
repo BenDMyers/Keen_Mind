@@ -7,6 +7,11 @@ const filteredOutProperties = ['monk', 'special'];
 const armorCategories = ['Heavy', 'Medium', 'Light']; // for armor-armor, not shields and such
 const placeholderDetail = {name: '\u200B', value: '\u200B', inline: true};
 
+/**
+ * Formats an item's list of *relevant* properties as a comma-separated string
+ * @param {[{index: String, name: String}]} properties array of property objects an item can have
+ * @returns {String} comma-separated property list
+ */
 function formatProperties(properties) {
 	return properties
 		.filter(prop => !filteredOutProperties.includes(prop.index))
@@ -14,6 +19,11 @@ function formatProperties(properties) {
 		.join(', ');
 }
 
+/**
+ * Fetch a item's complete details and convert it into a Discord Embed object
+ * @param {{name: String, index: String, url: String}} matchedItem reduced item object returned from the API's /equipment endpoint
+ * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
+ */
 async function getItemDetails(matchedItem) {
 	const {url} = matchedItem;
 	const item = await fetch(`https://www.dnd5eapi.co${url}`).then(res => res.json());
@@ -28,6 +38,11 @@ async function getItemDetails(matchedItem) {
 	}
 }
 
+/**
+ * Convert a piece of adventuring gear into a Discord Embed object
+ * @param {{capacity: String, cost: {quantity: Number, unit: String}, equipment_category: {index: String, name: String}, gear_category: {name: String}, name: String, speed: {quantity: Number, unit: String}, tool_category: String, vehicle_category: String, weight: Number}} gear an Adventuring Gear item returned from the 5e API
+ * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
+ */
 async function getAdventuringGearDetails(gear) {
 	const fields = [];
 
@@ -96,6 +111,11 @@ async function getAdventuringGearDetails(gear) {
 	return details;
 }
 
+/**
+ * Convert a piece of armor or a shield into a Discord Embed object
+ * @param {{armor_category: String, armor_class: {base: Number, dex_bonus: Boolean, max_bonus: Number}, cost: {quantity: Number, unit: String}, name: String, str_minimum: Number, stealth_disadvantage: Boolean, weight: Number}} armor Armor or Shield item returned from the 5e API
+ * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
+ */
 function getArmorDetails(armor) {
 	const fields = [];
 
@@ -155,6 +175,22 @@ function getArmorDetails(armor) {
 	return details;
 }
 
+/**
+ * Convert a weapon into a Discord Embed object
+ * @param {{
+ * 		'2h_damage': {damage_dice: String, damage_type: {name: String}},
+ *		category_range: String,
+ * 		cost: {quantity: Number, unit: String},
+ * 		damage: {damage_dice: String, damage_type: {name: String}},
+ * 		name: String,
+ * 		properties: [{index: String, name: String}]
+ * 		range: {long: Number, normal: Number},
+ * 		special: String,
+ * 		throw_range: {long: Number, normal: Number},
+ * 		weight: Number
+ * }} weapon Weapon item returned from the 5e API
+ * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
+ */
 function getWeaponDetails(weapon) {
 	const fields = [];
 
