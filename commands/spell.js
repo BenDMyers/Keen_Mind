@@ -30,6 +30,7 @@ async function getSpellDetails(matchedSpell) {
 	const spell = await fetch(`https://www.dnd5eapi.co${url}`).then(res => res.json());
 
 	const fields = [];
+
 	if (spell.casting_time) fields.push({name: 'Casting Time', value: spell.casting_time, inline: true});
 	if (spell.range) fields.push({name: 'Range', value: spell.range, inline: true});
 	if (spell.components) fields.push({name: 'Components', value: formatComponents(spell.components), inline: true});

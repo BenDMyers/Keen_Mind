@@ -18,8 +18,11 @@ const sluggify = (args) => {
  * @returns {String} Args formatted like an `index` in a 5e API object
  */
 const indexify = (args) => {
+	console.log(args);
 	return args
-		.map(arg => arg.replace(/\W+/g, ''))
+		.map(arg => arg
+			.replace(/\//g, '-')
+			.replace(/[^A-Za-z0-9-]+/g, ''))
 		.join('-')
 		.toLowerCase();
 };
