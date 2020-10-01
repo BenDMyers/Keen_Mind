@@ -33,7 +33,12 @@ async function getSpellDetails(matchedSpell) {
 	if (spell.casting_time) fields.push({name: 'Casting Time', value: spell.casting_time, inline: true});
 	if (spell.range) fields.push({name: 'Range', value: spell.range, inline: true});
 	if (spell.components) fields.push({name: 'Components', value: formatComponents(spell.components), inline: true});
-	if (spell.duration) fields.push({name: 'Duration', value: spell.duration, inline: true});
+
+	const duration = [];
+	if (spell.concentration) duration.push('Concentration');
+	if (spell.duration) duration.push(spell.duration);
+	if (duration.length) fields.push({name: 'Duration', value: duration.join(', '), inline: true});
+
 	if (spell.damage) {
 		const damage = [];
 		if (spell.damage.damage_at_slot_level) {
@@ -60,7 +65,13 @@ async function getSpellDetails(matchedSpell) {
 	}
 
 	const spellLevel = spell.level === 0 ? 'Cantrip' : `${ordinal(spell.level)} Level`;
-	const subtitle = `***${spellLevel} · ${spell.school.name}***`;
+	let subtitle = `${spellLevel} · ${spell.school.name}`;
+
+	if (spell.ritual) {
+		subtitle += ' (Ritual)';
+	}
+
+	subtitle = `***${subtitle}***`;
 
 	const spellDescription = Array.isArray(spell.desc) ? spell.desc.join('\n\n') : spell.desc;
 	let embedDescription = `${subtitle}\n\n${spellDescription}`;
