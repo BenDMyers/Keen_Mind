@@ -12,8 +12,6 @@ async function getClassFeatureDetails(matchedFeature) {
 	const {url} = matchedFeature;
 	const classFeature = await fetch(`https://www.dnd5eapi.co${url}`).then(res => res.json());
 
-	console.log(classFeature);
-
 	let subtitle = classFeature.class.name;
 	if (classFeature.subclass) subtitle += ` (${classFeature.subclass.name})`;
 	if (classFeature.level) subtitle += ` · Level ${classFeature.level}`;
@@ -64,7 +62,7 @@ module.exports = {
 		const exactMatch = classFeatures.length > 0 && classFeatures.find(feature => feature.index === index);
 
 		if (classFeatures.length === 0) {
-			message.reply(`I couldn't find any class features called _${fullName}_ (\`${index}\`). Try again with a shorter query`);
+			message.reply(`I couldn't find any class features called _${fullName}_. Try again with a shorter query`);
 		} else if (exactMatch) {
 			const featureDetails = await getClassFeatureDetails(exactMatch);
 			if (classFeatures.length > 1) {
