@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const usage = require('../replies/usage');
-const {YELLOW, GRAY, BLUE} = require('../utils/colors');
+const {YELLOW, GRAY, BLUE, GREEN} = require('../utils/colors');
+const parseTable = require('../utils/parse-table');
 const {indexify, sluggify} = require('../utils/sluggify');
 
 const filteredOutProperties = ['monk', 'special'];
@@ -25,14 +26,19 @@ function formatProperties(properties) {
  * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
  */
 async function getItemDetails(matchedItem) {
-	const {url} = matchedItem;
+	let {index, url} = matchedItem;
+	if (!url) {
+		url = `/api/magic-items/${index}`;
+	}
 	const item = await fetch(`https://www.dnd5eapi.co${url}`).then(res => res.json());
 
-	switch (item.equipment_category.index) {
+	switch (item.equipment_category.index || item.equipment_category.name.toLowerCase()) {
 		case 'armor':
 			return getArmorDetails(item);
 		case 'weapon':
 			return getWeaponDetails(item);
+		case 'wondrous item':
+			return getWondrousItemDetails(item);
 		default:
 			return getAdventuringGearDetails(item);
 	}
@@ -147,11 +153,21 @@ function getArmorDetails(armor) {
 		fields.push({name: 'Weight', value: `${armor.weight} lbs`, inline: true});
 	}
 
-	let desc = armor.armor_category;
-	if (armorCategories.includes(armor.armor_category)) {
-		desc += ' Armor';
+	let desc = '';
+	if (armor.armor_category) {
+		desc = armor.armor_category;
+		if (armorCategories.includes(armor.armor_category)) {
+			desc += ' Armor';
+		}
+	} else if (Array.isArray(armor.desc) && armor.desc.length > 0) {
+		desc = armor.desc[0];
 	}
 	desc = `***${desc}***`;
+
+	if (Array.isArray(armor.desc) && armor.desc.length > 1) {
+		const providedDescription = armor.desc.slice(1).join('\n\n');
+		desc += `\n\n${providedDescription}`;
+	}
 
 	if (armorCategories.includes(armor.armor_category)) {
 		desc += '\n\nAnyone can put on a suit of armor or strap a Shield to an arm. Only those proficient in the armor’s use know how to wear it effectively, however. Your class gives you proficiency with certain types of armor. If you wear armor that you lack proficiency with, you have disadvantage on any ability check, saving throw, or Attack roll that involves Strength or Dexterity, and you can’t cast Spells.';
@@ -256,6 +272,58 @@ function getWeaponDetails(weapon) {
 	return details;
 }
 
+/**
+ * Convert a wondrous item into a Discord Embed object
+ * @param {{
+ * 		desc: [String],
+ * 		name: String
+ * }} wondrousItem Wondrous item returned from the 5e API
+ * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
+ */
+async function getWondrousItemDetails(wondrousItem) {
+	let description = '';
+	let fields = [];
+	let footer = '';
+
+	if (wondrousItem.desc && typeof wondrousItem.desc === 'string') {
+		description = wondrousItem.desc;
+	} else if (wondrousItem.desc && Array.isArray(wondrousItem.desc)) {
+		const tableStart = wondrousItem.desc.findIndex(line => line.startsWith('|'));
+
+		// Contains a Markdown-formatted table
+		if (tableStart !== -1) {
+			const descriptionLines = wondrousItem.desc.slice(0, tableStart);
+			const tableLines = wondrousItem.desc.slice(tableStart);
+
+			if (descriptionLines.length > 1) {
+				descriptionLines[0] = `***${descriptionLines[0]}***`;
+			}
+			description = descriptionLines.join('\n\n');
+
+			const parsedTable = parseTable(tableLines);
+			fields = parsedTable.fields;
+			footer = parsedTable.footer;
+		}
+	}
+
+	const details = {
+		color: GREEN,
+		title: wondrousItem.name,
+		description
+	};
+
+	if (fields.length > 0) {
+		details.fields = fields;
+	}
+
+	if (footer.length > 0) {
+		details.footer = footer;
+	}
+
+	return details;
+
+}
+
 module.exports = {
 	name: 'item',
 	description: 'Find armor, weaponry, or other equipment.',
@@ -267,19 +335,25 @@ module.exports = {
 
 		const fullName = args.join(' ');
 		const query = sluggify(args);
-		const items = await fetch(`https://www.dnd5eapi.co/api/equipment?name=${query}`)
-			.then(res => res.json());
+
+		const standardItems = await fetch(`https://www.dnd5eapi.co/api/equipment?name=${query}`).then(res => res.json());
+		const magicItems = await fetch(`https://www.dnd5eapi.co/api/magic-items?name=${query}`).then(res => res.json());
+		const items = {
+			count: standardItems.count + magicItems.count,
+			results: [...standardItems.results, ...magicItems.results]
+		};
 
 		const index = indexify(args);
 		const exactMatch = items.count > 0 && items.results.find(item => item.index === index);
-
-		console.log({items, exactMatch});
 
 		if (items.count === 0) {
 			message.reply(`I couldn't find any items called _${fullName}_. Try again with a shorter query`);
 		} else if (exactMatch) {
 			const itemDetails = await getItemDetails(exactMatch);
-			if (items.count > 1) {
+			
+			if (itemDetails.footer) {
+				itemDetails.footer = {text: itemDetails.footer};
+			} else if (items.count > 1) {
 				const alternatives = items.results
 					.filter(item => item.index !== index)
 					.map(alt => `* ${alt.name}`)
@@ -288,7 +362,7 @@ module.exports = {
 				itemDetails.footer = {text: `---\nI also found:\n${alternatives}`};
 			}
 
-			if (itemDetails.fields.length % 3 === 2) {
+			if (itemDetails.fields && itemDetails.fields.length % 3 === 2) {
 				itemDetails.fields.push(placeholderDetail);
 			}
 
@@ -296,7 +370,12 @@ module.exports = {
 		} else if (items.count === 1) {
 			const bestGuess = items.results[0];
 			const itemDetails = await getItemDetails(bestGuess);
-			itemDetails.footer = {text: '---\nThis was my best guess! Feel free to search again!'};
+
+			if (itemDetails.footer) {
+				itemDetails.footer = {text: itemDetails.footer};
+			} else {
+				itemDetails.footer = {text: '---\nThis was my best guess! Feel free to search again!'};
+			}
 
 			if (itemDetails.fields.length % 3 === 2) {
 				itemDetails.fields.push(placeholderDetail);
