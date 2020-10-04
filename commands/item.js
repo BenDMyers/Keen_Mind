@@ -303,6 +303,8 @@ async function getWondrousItemDetails(wondrousItem) {
 			const parsedTable = parseTable(tableLines);
 			fields = parsedTable.fields;
 			footer = parsedTable.footer;
+		} else {
+			description = wondrousItem.desc.join('\n\n');
 		}
 	}
 
