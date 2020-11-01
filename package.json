@@ -12,7 +12,8 @@
   "dependencies": {
     "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "rpgdicejs": "^2.0.0-rc.3"
   },
   "devDependencies": {
     "eslint": "^7.10.0",
