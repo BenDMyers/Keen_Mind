@@ -16,7 +16,14 @@ module.exports = {
 		try {
 			const roll = dice.eval(rollString);
 			const rendered = roll.render();
-			message.reply(`\`${rendered}\`\n= **${roll.value}**`);
+			const response = `\`${rendered}\`\n= **${roll.value}**`;
+
+			if (response.length >= 2000) {
+				message.reply(`Trust me, you rolled a **${roll.value}**.`);
+			} else {
+				message.reply(response);
+			}
+			message.reply();
 		} catch (err) {
 			message.reply('Sorry! That wasn\'t a valid roll!');
 		}
