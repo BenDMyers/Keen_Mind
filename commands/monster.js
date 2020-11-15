@@ -3,6 +3,7 @@ const usage = require('../replies/usage');
 const getAbilityScoreModifier = require('../utils/ability-score-modifiers');
 const formatObjectAsCsv = require('../utils/format-object-as-csv');
 const {indexify, sluggify} = require('../utils/sluggify');
+const toTitleCase = require('../utils/to-title-case');
 
 /**
  * @param {Number} score raw ability score
@@ -86,12 +87,42 @@ async function getMonsterDetails(matchedMonster) {
 	desc.push(`***${subtitle}***\n`);
 
 	// Basic details
-	if (monster.armor_class) desc.push(`**Armor Class** ${monster.armor_class}`);
-	if (monster.hit_points) desc.push(`**Hit Points** ${monster.hit_points} *(${monster.hit_dice})*`);
-	if (monster.speed) desc.push(`**Speed** ${formatSpeed(monster.speed)}`);
-	if (savingThrowProficiencies) desc.push(`**Saving Throws** ${formatProficiencies(savingThrowProficiencies)}`);
-	if (skillProficiencies) desc.push(`**Skills** ${formatProficiencies(skillProficiencies)}`);
-	if (monster.senses && Object.keys(monster.senses).length > 0) desc.push(`**Senses** ${formatObjectAsCsv(monster.senses)}`);
+	if (monster.armor_class) {
+		desc.push(`**Armor Class** ${monster.armor_class}`);
+	}
+	if (monster.hit_points) {
+		desc.push(`**Hit Points** ${monster.hit_points} *(${monster.hit_dice})*`);
+	}
+	if (monster.speed) {
+		desc.push(`**Speed** ${formatSpeed(monster.speed)}`);
+	}
+	if (savingThrowProficiencies) {
+		desc.push(`**Saving Throws** ${formatProficiencies(savingThrowProficiencies)}`);
+	}
+	if (skillProficiencies) {
+		desc.push(`**Skills** ${formatProficiencies(skillProficiencies)}`);
+	}
+	if (monster.damage_vulnerabilities && monster.damage_vulnerabilities.length > 0) {
+		const containsCommas = monster.damage_vulnerabilities.some(v => v.includes(','));
+		const delimiter = containsCommas ? '; ' : ', ';
+		desc.push(`**Vulnerabilities** ${monster.damage_vulnerabilities.map(toTitleCase).join(delimiter)}`);
+	}
+	if (monster.damage_resistances && monster.damage_resistances.length > 0) {
+		const containsCommas = monster.damage_resistances.some(r => r.includes(','));
+		const delimiter = containsCommas ? '; ' : ', ';
+		desc.push(`**Damage Resistance** ${monster.damage_resistances.map(toTitleCase).join(delimiter)}`);
+	}
+	if (monster.damage_immunities && monster.damage_immunities.length > 0) {
+		const containsCommas = monster.damage_immunities.some(i => i.includes(','));
+		const delimiter = containsCommas ? '; ' : ', ';
+		desc.push(`**Damage Immunities** ${monster.damage_immunities.map(toTitleCase).join(delimiter)}`);
+	}
+	if (monster.condition_immunities && monster.condition_immunities.length > 0) {
+		desc.push(`**Condition Immunities** ${monster.condition_immunities.map(i => toTitleCase(i.name)).join(', ')}`);
+	}
+	if (monster.senses && Object.keys(monster.senses).length > 0) {
+		desc.push(`**Senses** ${formatObjectAsCsv(monster.senses)}`);
+	}
 
 	return {
 		title: monster.name,
