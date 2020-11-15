@@ -1,11 +1,39 @@
 const fetch = require('node-fetch');
 const usage = require('../replies/usage');
-// const getAbilityScoreModifier = require('../utils/ability-score-modifiers');
+const getAbilityScoreModifier = require('../utils/ability-score-modifiers');
 const {indexify, sluggify} = require('../utils/sluggify');
 
 /**
+ * @param {Number} score raw ability score
+ * @returns {String} formatted ability score with modifier
+ */
+function formatAbilityScore(score) {
+	return `**${score}** *(${getAbilityScoreModifier(score)})*`;
+}
+
+/**
+ * Converts a monster's raw ability scores to a list of Discord Embed fields with modifiers
+ * @param {Monster} monster queried monster
+ * @returns {{name: String, value: String, inline: Boolean}[]} Discord Embed field objects
+ */
+function listAbilityScores(monster) {
+	const {strength, dexterity, constitution, intelligence, wisdom, charisma} = monster;
+
+	const abilityScores = [
+		{name: 'STR', value: formatAbilityScore(strength), inline: true},
+		{name: 'DEX', value: formatAbilityScore(dexterity), inline: true},
+		{name: 'CON', value: formatAbilityScore(constitution), inline: true},
+		{name: 'INT', value: formatAbilityScore(intelligence), inline: true},
+		{name: 'WIS', value: formatAbilityScore(wisdom), inline: true},
+		{name: 'CHA', value: formatAbilityScore(charisma), inline: true},
+	];
+
+	return abilityScores;
+}
+
+/**
  * Convert a monster into a Discord Embed object
- * @param {Monster} monster Monster stats returned from the 5e API
+ * @param {{name: String, index: String, url: String}} matchedMonster Monster ref returned from the 5e API
  * @returns {{
  * 		color: Number,
  * 		title: String,
@@ -13,8 +41,14 @@ const {indexify, sluggify} = require('../utils/sluggify');
  * 		fields: {name: String, value: String, inline: Boolean}[]
  * }} Discord Embed object
  */
-async function getMonsterDetails(monster) {
+async function getMonsterDetails(matchedMonster) {
+	/** @type {Monster} */
+	const monster = await fetch(`https://www.dnd5eapi.co${matchedMonster.url}`).then(res => res.json());
 
+	return {
+		title: monster.name,
+		fields: monster.strength ? listAbilityScores(monster) : undefined
+	};
 }
 
 module.exports = {
