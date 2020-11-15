@@ -198,8 +198,9 @@ function getArmorDetails(armor) {
  *		category_range: String,
  * 		cost: {quantity: Number, unit: String},
  * 		damage: {damage_dice: String, damage_type: {name: String}},
+ * 		desc: String[]
  * 		name: String,
- * 		properties: [{index: String, name: String}]
+ * 		properties: {index: String, name: String}[]
  * 		range: {long: Number, normal: Number},
  * 		special: String,
  * 		throw_range: {long: Number, normal: Number},
@@ -224,19 +225,22 @@ function getWeaponDetails(weapon) {
 		fields.push({name: 'Two-Handed Damage', value: twoHandedDamage, inline: true});
 	}
 
-	let range = `${weapon.range.normal} ft`;
-	if (weapon.range.long) {
-		range += `/${weapon.range.long} ft`;
-	}
-	fields.push({name: 'Range', value: range, inline: true});
-
-	if (weapon.throw_range) {
-		let thrownRange = `${weapon.throw_range.normal} ft`;
-		if (weapon.throw_range.long) {
-			thrownRange += `/${weapon.throw_range.long} ft`;
+	if (weapon.range) {
+		let range = `${weapon.range.normal} ft`;
+		if (weapon.range.long) {
+			range += `/${weapon.range.long} ft`;
 		}
-		if (thrownRange !== range) fields.push({name: 'Throw Range', value: thrownRange, inline: true});
+		fields.push({name: 'Range', value: range, inline: true});
+
+		if (weapon.throw_range) {
+			let thrownRange = `${weapon.throw_range.normal} ft`;
+			if (weapon.throw_range.long) {
+				thrownRange += `/${weapon.throw_range.long} ft`;
+			}
+			if (thrownRange !== range) fields.push({name: 'Throw Range', value: thrownRange, inline: true});
+		}
 	}
+
 
 	if (weapon.cost) {
 		const cost = `${weapon.cost.quantity} ${weapon.cost.unit}`;
@@ -252,21 +256,30 @@ function getWeaponDetails(weapon) {
 		if (formatted) fields.push({name: 'Properties', value: formatted, inline: true});
 	}
 
-	let desc = `***${weapon.category_range} Weapon***`;
-	if (weapon.special) {
-		let specialDescription = Array.isArray(weapon.special) ?
-			weapon.special.join('\n\n') :
-			weapon.special;
-		if (specialDescription.length > 2000) {
-			specialDescription = specialDescription.substr(0, 2000) + '…';
-		}
-		desc += `\n\n${specialDescription}`;
+	const desc = [];
+	if (weapon.category_range) {
+		desc.push(`${weapon.category_range} Weapon`);
 	}
+
+	const providedDescription = weapon.special || weapon.desc;
+	if (Array.isArray(providedDescription)) {
+		desc.push(...providedDescription);
+	} else if (providedDescription) {
+		desc.push(providedDescription);
+	}
+
+	if (desc[0]) {
+		desc[0] = `***${desc[0]}***`;
+	}
+
+	const description = desc.length ?
+		desc.join('\n\n').substring(0, 2000) :
+		undefined;
 
 	const details = {
 		color: YELLOW,
 		title: weapon.name,
-		description: desc,
+		description,
 		fields
 	};
 	return details;
