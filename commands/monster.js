@@ -5,14 +5,7 @@ const {indexify, sluggify} = require('../utils/sluggify');
 
 /**
  * Converts raw ability scores to a list with names and modifiers
- * @param {{
- * 		charisma: Number,
- * 		constitution: Number
- * 		dexterity: Number,
- * 		intelligence: Number,
- * 		strength: Number,
- * 		wisdom: Number
- * }} stats JSON object representing monster's stats
+ * @param {Monster} stats JSON object representing monster's stats
  * @returns {string}
  */
 function listAbilityScores(stats) {
@@ -21,8 +14,7 @@ function listAbilityScores(stats) {
 
 /**
  * Convert a monster into a Discord Embed object
- * @param {{
- * }} monster Monster stats returned from the 5e API
+ * @param {Monster} monster Monster stats returned from the 5e API
  * @returns {{
  * 		color: Number,
  * 		title: String,
@@ -75,3 +67,62 @@ module.exports = {
 		}
 	}
 };
+
+/**
+ * @typedef {{
+ * 		attack_bonus: Number,
+ * 		damage: {
+ * 			damage_dice: String,
+ * 			damage_type: {index: String, name: String, url: String}
+ * 		}[]
+ * 		desc: String,
+ * 		name: String
+ * }} Action
+ */
+
+/**
+ * @typedef {'acid' | 'bludgeoning' | 'cold' | 'fire' | 'force' | 'lightning' | 'necrotic' | 'piercing' | 'poison' | 'psychic' | 'radiant' | 'slashing' | 'thunder'} DamageType
+ */
+
+/**
+ * @typedef {{
+ * 		proficiency: {index: String, name: String, url: String},
+ * 		value: Number
+ * }} Proficiency
+ */
+
+/**
+ * @typedef {{
+ * 		actions: Action[],
+ * 		alignment: String,
+ * 		armor_class: Number,
+ * 		challenge_rating: Number,
+ * 		charisma: Number,
+ * 		condition_immunities: {name: string, index: string, url: string}[],
+ * 		constitution: Number,
+ * 		damage_immunities: DamageType[],
+ * 		damage_resistances: DamageType[],
+ * 		damage_vulnerabilities: DamageType[],
+ * 		dexterity: Number,
+ * 		hit_dice: String,
+ * 		hit_points: Number,
+ * 		index: String,
+ * 		intelligence: Number,
+ * 		languages: String,
+ * 		name: String,
+ * 		proficiencies: Proficiency[],
+ * 		senses: Object,
+ * 		size: 'Tiny' | 'Small' | 'Medium' | 'Large' | 'Huge' | 'Gargantuan',
+ * 		special_abilities: {name: String, desc: String}[],
+ * 		speed: {
+ * 			climb: String | undefined,
+ * 			fly: String | undefined,
+ * 			walk: String | undefined
+ * 		},
+ * 		strength: Number,
+ * 		subtype: String | null
+ * 		type: String,
+ * 		url: String,
+ * 		wisdom: Number
+ * }} Monster
+ */
