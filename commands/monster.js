@@ -1,6 +1,8 @@
 const fetch = require('node-fetch');
 const usage = require('../replies/usage');
 const getAbilityScoreModifier = require('../utils/ability-score-modifiers');
+const {RED} = require('../utils/colors');
+const {formatFraction, formatNumberWithCommas} = require('../utils/format-numbers');
 const formatObjectAsCsv = require('../utils/format-object-as-csv');
 const {indexify, sluggify} = require('../utils/sluggify');
 const toTitleCase = require('../utils/to-title-case');
@@ -56,7 +58,7 @@ function formatProficiencies(proficiencies) {
 	return proficiencies
 		.map(p => {
 			const name = p.proficiency.name.replace(/.*:\s*/g, '');
-			const bonus = p.value > 0 ? `+${p.value}` : p.value;
+			const bonus = p.value >= 0 ? `+${p.value}` : p.value;
 			return `${name} ${bonus}`;
 		})
 		.join(', ');
@@ -96,10 +98,13 @@ async function getMonsterDetails(matchedMonster) {
 	if (monster.speed) {
 		desc.push(`**Speed** ${formatSpeed(monster.speed)}`);
 	}
-	if (savingThrowProficiencies) {
+	desc.push('');
+
+	// More details
+	if (savingThrowProficiencies && savingThrowProficiencies.length > 0) {
 		desc.push(`**Saving Throws** ${formatProficiencies(savingThrowProficiencies)}`);
 	}
-	if (skillProficiencies) {
+	if (skillProficiencies && skillProficiencies.length > 0) {
 		desc.push(`**Skills** ${formatProficiencies(skillProficiencies)}`);
 	}
 	if (monster.damage_vulnerabilities && monster.damage_vulnerabilities.length > 0) {
@@ -123,8 +128,20 @@ async function getMonsterDetails(matchedMonster) {
 	if (monster.senses && Object.keys(monster.senses).length > 0) {
 		desc.push(`**Senses** ${formatObjectAsCsv(monster.senses)}`);
 	}
+	if (monster.languages) {
+		desc.push(`**Languages** ${monster.languages}`);
+	}
+	if (typeof monster.challenge_rating === 'number') {
+		let rating = formatFraction(monster.challenge_rating);
+		if (monster.xp) {
+			rating += ` (${formatNumberWithCommas(monster.xp)} XP)`;
+		}
+		desc.push(`**Challenge** ${rating}`);
+	}
+	desc.push('');
 
 	return {
+		color: RED,
 		title: monster.name,
 		description: desc.join('\n'),
 		fields: monster.strength ? listAbilityScores(monster) : undefined
