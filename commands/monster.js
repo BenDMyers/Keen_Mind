@@ -1,16 +1,7 @@
 const fetch = require('node-fetch');
 const usage = require('../replies/usage');
-const getAbilityScoreModifier = require('../utils/ability-score-modifiers');
+// const getAbilityScoreModifier = require('../utils/ability-score-modifiers');
 const {indexify, sluggify} = require('../utils/sluggify');
-
-/**
- * Converts raw ability scores to a list with names and modifiers
- * @param {Monster} stats JSON object representing monster's stats
- * @returns {string}
- */
-function listAbilityScores(stats) {
-	
-}
 
 /**
  * Convert a monster into a Discord Embed object
@@ -76,7 +67,15 @@ module.exports = {
  * 			damage_type: {index: String, name: String, url: String}
  * 		}[]
  * 		desc: String,
- * 		name: String
+ * 		name: String,
+ * 		options: {
+ * 			choose: Number,
+ * 			from: {count: Number, name: String, type: String}[][]
+ * 		},
+ * 		usage: {
+ * 			times: Number,
+ * 			type: String
+ * 		}
  * }} Action
  */
 
@@ -89,6 +88,31 @@ module.exports = {
  * 		proficiency: {index: String, name: String, url: String},
  * 		value: Number
  * }} Proficiency
+ */
+
+/**
+ * @typedef {{
+ * 		desc: String,
+ * 		name: String,
+ *		spellcasting: {
+ *			ability: {index: String, name: String, url: String},
+ *			components_required: string[],
+ *			dc: Number,
+ *			spells: Spell[]
+ * 		}
+ * }} SpecialAbility
+ */
+
+/**
+ * @typedef {{
+ * 		level: Number,
+ * 		name: String,
+ * 		url: String,
+ * 		usage: {
+ * 			times: Number,
+ * 			type: String
+ * 		}
+ * }} Spell
  */
 
 /**
@@ -109,11 +133,12 @@ module.exports = {
  * 		index: String,
  * 		intelligence: Number,
  * 		languages: String,
+ * 		legendary_actions: Action[],
  * 		name: String,
  * 		proficiencies: Proficiency[],
  * 		senses: Object,
  * 		size: 'Tiny' | 'Small' | 'Medium' | 'Large' | 'Huge' | 'Gargantuan',
- * 		special_abilities: {name: String, desc: String}[],
+ * 		special_abilities: SpecialAbility[],
  * 		speed: {
  * 			climb: String | undefined,
  * 			fly: String | undefined,
@@ -123,6 +148,7 @@ module.exports = {
  * 		subtype: String | null
  * 		type: String,
  * 		url: String,
- * 		wisdom: Number
+ * 		wisdom: Number,
+ * 		xp: Number
  * }} Monster
  */
