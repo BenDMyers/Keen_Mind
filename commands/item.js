@@ -50,7 +50,8 @@ async function getItemDetails(matchedItem) {
  * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
  */
 async function getAdventuringGearDetails(gear) {
-	const fields = [];
+	let fields = [];
+	let footer;
 
 	if (gear.cost) {
 		const cost = [];
@@ -88,16 +89,32 @@ async function getAdventuringGearDetails(gear) {
 				break;
 		}
 	}
-	let desc = `***${subtitle}***`;
+	
+	const desc = [`***${subtitle}***`];
 
-	if (gear.desc) {
-		const description = Array.isArray(gear.desc) ?
-			gear.desc.join('\n\n') :
-			gear.desc;
+	if (Array.isArray(gear.desc)) {
+		const tableStart = gear.desc.findIndex(line => line.startsWith('|'));
 
-		desc += `\n\n${description}`;
+		// Contains a Markdown-formatted table
+		if (tableStart !== -1) {
+			const descriptionLines = gear.desc.slice(0, tableStart);
+			const tableLines = gear.desc.slice(tableStart);
+
+			if (descriptionLines.length > 1) {
+				descriptionLines[0] = `***${descriptionLines[0]}***`;
+			}
+			desc.push(...descriptionLines);
+
+			const parsedTable = parseTable(tableLines);
+			fields = parsedTable.fields;
+			footer = parsedTable.footer;
+		} else {
+			desc.push(...gear.desc);
+		}
+	} else if (gear.desc) {
+		desc.push(gear.desc);
 	}
-
+	
 	if (gear.contents && gear.contents.length) {
 		const response = await fetch('https://www.dnd5eapi.co/api/equipment/').then(res => res.json());
 		const allItems = response.results;
@@ -105,14 +122,15 @@ async function getAdventuringGearDetails(gear) {
 			const {name} = allItems.find(item => item.url === content.item_url);
 			return `${content.quantity}x ${name}`;
 		});
-		desc += `\n\n${contentsList.join('\n')}`;
+		desc.push(contentsList.join('\n'));
 	}
 
 	const details = {
 		color: GRAY,
 		title: gear.name,
-		description: desc,
-		fields
+		description: desc.join('\n\n').substring(0, 2000),
+		fields,
+		footer
 	};
 	return details;
 }
@@ -209,7 +227,8 @@ function getArmorDetails(armor) {
  * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
  */
 function getWeaponDetails(weapon) {
-	const fields = [];
+	let fields = [];
+	let footer;
 
 	if (weapon.damage) {
 		const damage = [];
@@ -263,7 +282,24 @@ function getWeaponDetails(weapon) {
 
 	const providedDescription = weapon.special || weapon.desc;
 	if (Array.isArray(providedDescription)) {
-		desc.push(...providedDescription);
+		const tableStart = providedDescription.findIndex(line => line.startsWith('|'));
+
+		// Contains a Markdown-formatted table
+		if (tableStart !== -1) {
+			const descriptionLines = providedDescription.slice(0, tableStart);
+			const tableLines = providedDescription.slice(tableStart);
+
+			if (descriptionLines.length > 1) {
+				descriptionLines[0] = `***${descriptionLines[0]}***`;
+			}
+			desc.push(...descriptionLines);
+
+			const parsedTable = parseTable(tableLines);
+			fields = parsedTable.fields;
+			footer = parsedTable.footer;
+		} else {
+			desc.push(...providedDescription);
+		}
 	} else if (providedDescription) {
 		desc.push(providedDescription);
 	}
@@ -280,7 +316,8 @@ function getWeaponDetails(weapon) {
 		color: YELLOW,
 		title: weapon.name,
 		description,
-		fields
+		fields,
+		footer
 	};
 	return details;
 }
