@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const usage = require('../replies/usage');
 const getAbilityScoreModifier = require('../utils/ability-score-modifiers');
+const formatObjectAsCsv = require('../utils/format-object-as-csv');
 const {indexify, sluggify} = require('../utils/sluggify');
 
 /**
@@ -32,6 +33,35 @@ function listAbilityScores(monster) {
 }
 
 /**
+ * Formats speeds as a comma-separated list. Walk speed is unlabelled, but the other kinds of speeds are labelled.
+ * @param {{climb: String, fly: String, swim: String, walk: String}} speed
+ * @returns {string} comma-separated list of speeds
+ */
+function formatSpeed(speed) {
+	const {walk, ...otherSpeeds} = speed;
+	const formattedOtherSpeeds = formatObjectAsCsv(otherSpeeds);
+
+	return formattedOtherSpeeds ?
+		`${walk}, ${formattedOtherSpeeds}` :
+		walk;
+}
+
+/**
+ * Formats proficiencies as a comma-separated list
+ * @param {Proficiency[]} proficiencies list of the monster's proficiencies
+ * @returns {String} comma-separated list of saving throw and/or skill proficiencies
+ */
+function formatProficiencies(proficiencies) {
+	return proficiencies
+		.map(p => {
+			const name = p.proficiency.name.replace(/.*:\s*/g, '');
+			const bonus = p.value > 0 ? `+${p.value}` : p.value;
+			return `${name} ${bonus}`;
+		})
+		.join(', ');
+}
+
+/**
  * Convert a monster into a Discord Embed object
  * @param {{name: String, index: String, url: String}} matchedMonster Monster ref returned from the 5e API
  * @returns {{
@@ -44,9 +74,28 @@ function listAbilityScores(monster) {
 async function getMonsterDetails(matchedMonster) {
 	/** @type {Monster} */
 	const monster = await fetch(`https://www.dnd5eapi.co${matchedMonster.url}`).then(res => res.json());
+	const savingThrowProficiencies = monster.proficiencies && monster.proficiencies.length > 0 && monster.proficiencies.filter(p => p.proficiency.name.startsWith('Saving Throw: '));
+	const skillProficiencies = monster.proficiencies && monster.proficiencies.length > 0 && monster.proficiencies.filter(p => p.proficiency.name.startsWith('Skill: '));
+
+	const desc = [];
+
+	// Subtitle
+	let subtitle = `${monster.size} ${monster.type}`;
+	if (monster.subtype) subtitle += ` (${monster.subtype})`;
+	if (monster.alignment) subtitle += `, ${monster.alignment}`;
+	desc.push(`***${subtitle}***\n`);
+
+	// Basic details
+	if (monster.armor_class) desc.push(`**Armor Class** ${monster.armor_class}`);
+	if (monster.hit_points) desc.push(`**Hit Points** ${monster.hit_points} *(${monster.hit_dice})*`);
+	if (monster.speed) desc.push(`**Speed** ${formatSpeed(monster.speed)}`);
+	if (savingThrowProficiencies) desc.push(`**Saving Throws** ${formatProficiencies(savingThrowProficiencies)}`);
+	if (skillProficiencies) desc.push(`**Skills** ${formatProficiencies(skillProficiencies)}`);
+	if (monster.senses && Object.keys(monster.senses).length > 0) desc.push(`**Senses** ${formatObjectAsCsv(monster.senses)}`);
 
 	return {
 		title: monster.name,
+		description: desc.join('\n'),
 		fields: monster.strength ? listAbilityScores(monster) : undefined
 	};
 }
