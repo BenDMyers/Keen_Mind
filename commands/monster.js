@@ -1,4 +1,5 @@
 const fetch = require('node-fetch');
+const reactToMonsters = require('../replies/react-to-monster');
 const usage = require('../replies/usage');
 const getAbilityScoreModifier = require('../utils/ability-score-modifiers');
 const {RED} = require('../utils/colors');
@@ -65,36 +66,6 @@ function formatProficiencies(proficiencies) {
 }
 
 /**
- * Creates a Discord Embed object specifically for a monster's actions and legendary actions
- * @param {Monster} monster requested monster
- * @returns {{title: String, description: String, color: Number}[]} Discord Embed to follow up the main stat block
- */
-function getActionsMessage(monster) {
-	/** @type {{title: String, description: String, color: String}[]} */
-	const followups = [];
-
-	if (monster.actions && monster.actions.length > 0) {
-		followups.push({
-			title: 'Actions',
-			description: monster.actions
-				.map(action => `**${action.name}.** ${action.desc}`)
-				.join('\n\n')
-		});
-	}
-
-	if (monster.legendary_actions && monster.legendary_actions.length > 0) {
-		followups.push({
-			title: 'Legendary Actions',
-			description: monster.legendary_actions
-				.map(action => `**${action.name}.** ${action.desc}`)
-				.join('\n\n')
-		});
-	}
-
-	return followups;
-}
-
-/**
  * Convert a monster into a Discord Embed object
  * @param {{name: String, index: String, url: String}} matchedMonster Monster ref returned from the 5e API
  * @returns {{
@@ -108,6 +79,7 @@ function getActionsMessage(monster) {
 async function getMonsterDetails(matchedMonster) {
 	/** @type {Monster} */
 	const monster = await fetch(`https://www.dnd5eapi.co${matchedMonster.url}`).then(res => res.json());
+	const followups = [];
 
 	const savingThrowProficiencies = monster.proficiencies && monster.proficiencies.length > 0 && monster.proficiencies.filter(p => p.proficiency.name.startsWith('Saving Throw: '));
 	const skillProficiencies = monster.proficiencies && monster.proficiencies.length > 0 && monster.proficiencies.filter(p => p.proficiency.name.startsWith('Skill: '));
@@ -175,26 +147,56 @@ async function getMonsterDetails(matchedMonster) {
 
 	// Traits
 	if (monster.special_abilities && Array.isArray(monster.special_abilities)) {
-		for(const specialAbility of monster.special_abilities) {
+		followups.push({title: 'Traits', description: ''});
+		for (const specialAbility of monster.special_abilities) {
 			let traitUsage = '';
 			if (specialAbility.usage && specialAbility.usage.times) {
 				traitUsage = ` *(${specialAbility.usage.times} ${specialAbility.usage.type})*`;
 			} else if (specialAbility.usage) {
 				traitUsage = ` *(${specialAbility.usage.type})*`;
 			}
-			const trait = `**${specialAbility.name}${traitUsage}.** ${specialAbility.desc.replace('\n\n', '\n')}\n`;
-			desc.push(trait);
+			const traitDescription = `**${specialAbility.name}${traitUsage}.** ${specialAbility.desc.replace('\n\n', '\n')}\n\n`;
+			const currentEmbed = followups[followups.length - 1];
+			if (currentEmbed.description.length + traitDescription.length > 2048) {
+				followups.push({description: traitDescription});
+			} else {
+				currentEmbed.description += traitDescription;
+			}
 		}
 	}
 
-	const hasActions = Array.isArray(monster.actions) || Array.isArray(monster.legendary_actions);
+	if (monster.actions && monster.actions.length > 0) {
+		followups.push({title: 'Actions', description: ''});
+		for (const action of monster.actions) {
+			const actionDescription = `**${action.name}.** ${action.desc}\n\n`;
+			const currentEmbed = followups[followups.length - 1];
+			if (currentEmbed.description.length + actionDescription.length > 2048) {
+				followups.push({description: actionDescription});
+			} else {
+				currentEmbed.description += actionDescription;
+			}
+		}
+	}
+
+	if (monster.legendary_actions && monster.legendary_actions.length > 0) {
+		followups.push({title: 'Legendary Actions', description: ''});
+		for (const action of monster.legendary_actions) {
+			const actionDescription = `**${action.name}.** ${action.desc}\n\n`;
+			const currentEmbed = followups[followups.length - 1];
+			if (currentEmbed.description.length + actionDescription.length > 2048) {
+				followups.push({description: actionDescription});
+			} else {
+				currentEmbed.description += actionDescription;
+			}
+		}
+	}
 
 	return {
 		color: RED,
 		title: monster.name,
-		description: desc.join('\n'),
+		description: desc.join('\n').substring(0, 2045),
 		fields: monster.strength ? listAbilityScores(monster) : undefined,
-		followups: hasActions ? getActionsMessage(monster) : undefined
+		followups
 	};
 }
 
@@ -227,14 +229,16 @@ module.exports = {
 
 				monsterDetails.footer = {text: `---\nI also found:\n${alternatives}`};
 			}
-			message.channel.send({embed: monsterDetails});
-			followups && followups.forEach(followup => message.channel.send({embed: followup}));
+			const reply = await message.channel.send({embed: monsterDetails});
+			reactToMonsters(reply, monsterDetails);
+			followups && followups.forEach(async (followup) => await message.channel.send({embed: followup}));
 		} else if (monsters.count === 1) {
 			const bestGuess = monsters.results[0];
 			const {followups, ...monsterDetails} = await getMonsterDetails(bestGuess);
 			monsterDetails.footer = {text: '---\nThis was my best guess! Feel free to search again!'};
-			message.channel.send({embed: monsterDetails});
-			followups && followups.forEach(followup => message.channel.send({embed: followup}));
+			const reply = await message.channel.send({embed: monsterDetails});
+			reactToMonsters(reply, monsterDetails);
+			followups && followups.forEach(async (followup) => await message.channel.send({embed: followup}));
 		} else {
 			const alternatives = monsters.results.map(alt => `* ${alt.name}`);
 			message.reply(`I couldn't find _${fullName}_. Did you mean one of these monsters?\n\n${alternatives.join('\n')}`);
