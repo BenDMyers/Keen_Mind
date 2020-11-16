@@ -65,18 +65,50 @@ function formatProficiencies(proficiencies) {
 }
 
 /**
+ * Creates a Discord Embed object specifically for a monster's actions and legendary actions
+ * @param {Monster} monster requested monster
+ * @returns {{title: String, description: String, color: Number}[]} Discord Embed to follow up the main stat block
+ */
+function getActionsMessage(monster) {
+	/** @type {{title: String, description: String, color: String}[]} */
+	const followups = [];
+
+	if (monster.actions && monster.actions.length > 0) {
+		followups.push({
+			title: 'Actions',
+			description: monster.actions
+				.map(action => `**${action.name}.** ${action.desc}`)
+				.join('\n\n')
+		});
+	}
+
+	if (monster.legendary_actions && monster.legendary_actions.length > 0) {
+		followups.push({
+			title: 'Legendary Actions',
+			description: monster.legendary_actions
+				.map(action => `**${action.name}.** ${action.desc}`)
+				.join('\n\n')
+		});
+	}
+
+	return followups;
+}
+
+/**
  * Convert a monster into a Discord Embed object
  * @param {{name: String, index: String, url: String}} matchedMonster Monster ref returned from the 5e API
  * @returns {{
  * 		color: Number,
  * 		title: String,
  * 		description: String,
- * 		fields: {name: String, value: String, inline: Boolean}[]
- * }} Discord Embed object
+ * 		fields: {name: String, value: String, inline: Boolean}[] | undefined,
+ * 		followups: {color: Number, title: String, description: String}[] | undefined
+ * }} Discord Embed object, with some optional followup messages
  */
 async function getMonsterDetails(matchedMonster) {
 	/** @type {Monster} */
 	const monster = await fetch(`https://www.dnd5eapi.co${matchedMonster.url}`).then(res => res.json());
+
 	const savingThrowProficiencies = monster.proficiencies && monster.proficiencies.length > 0 && monster.proficiencies.filter(p => p.proficiency.name.startsWith('Saving Throw: '));
 	const skillProficiencies = monster.proficiencies && monster.proficiencies.length > 0 && monster.proficiencies.filter(p => p.proficiency.name.startsWith('Skill: '));
 
@@ -155,11 +187,14 @@ async function getMonsterDetails(matchedMonster) {
 		}
 	}
 
+	const hasActions = Array.isArray(monster.actions) || Array.isArray(monster.legendary_actions);
+
 	return {
 		color: RED,
 		title: monster.name,
 		description: desc.join('\n'),
-		fields: monster.strength ? listAbilityScores(monster) : undefined
+		fields: monster.strength ? listAbilityScores(monster) : undefined,
+		followups: hasActions ? getActionsMessage(monster) : undefined
 	};
 }
 
@@ -183,7 +218,7 @@ module.exports = {
 		if (monsters.count === 0) {
 			message.reply(`I couldn't find any monsters called _${fullName}_. Try again with a shorter query.`);
 		} else if (exactMatch) {
-			const monsterDetails = await getMonsterDetails(exactMatch);
+			const {followups, ...monsterDetails} = await getMonsterDetails(exactMatch);
 			if (monsters.count > 1) {
 				const alternatives = monsters.results
 					.filter(monster => monster.index !== index)
@@ -193,11 +228,13 @@ module.exports = {
 				monsterDetails.footer = {text: `---\nI also found:\n${alternatives}`};
 			}
 			message.channel.send({embed: monsterDetails});
+			followups && followups.forEach(followup => message.channel.send({embed: followup}));
 		} else if (monsters.count === 1) {
 			const bestGuess = monsters.results[0];
-			const monsterDetails = await getMonsterDetails(bestGuess);
+			const {followups, ...monsterDetails} = await getMonsterDetails(bestGuess);
 			monsterDetails.footer = {text: '---\nThis was my best guess! Feel free to search again!'};
 			message.channel.send({embed: monsterDetails});
+			followups && followups.forEach(followup => message.channel.send({embed: followup}));
 		} else {
 			const alternatives = monsters.results.map(alt => `* ${alt.name}`);
 			message.reply(`I couldn't find _${fullName}_. Did you mean one of these monsters?\n\n${alternatives.join('\n')}`);
