@@ -80,6 +80,7 @@ async function getMonsterDetails(matchedMonster) {
 	const savingThrowProficiencies = monster.proficiencies && monster.proficiencies.length > 0 && monster.proficiencies.filter(p => p.proficiency.name.startsWith('Saving Throw: '));
 	const skillProficiencies = monster.proficiencies && monster.proficiencies.length > 0 && monster.proficiencies.filter(p => p.proficiency.name.startsWith('Skill: '));
 
+	/** @type {string[]} */
 	const desc = [];
 
 	// Subtitle
@@ -141,9 +142,17 @@ async function getMonsterDetails(matchedMonster) {
 	desc.push('');
 
 	// Traits
-	for(const specialAbility of monster.special_abilities) {
-		const trait = `**${specialAbility.name}.** ${specialAbility.desc.replace('\n\n', '\n')}\n`;
-		desc.push(trait);
+	if (monster.special_abilities && Array.isArray(monster.special_abilities)) {
+		for(const specialAbility of monster.special_abilities) {
+			let traitUsage = '';
+			if (specialAbility.usage && specialAbility.usage.times) {
+				traitUsage = ` *(${specialAbility.usage.times} ${specialAbility.usage.type})*`;
+			} else if (specialAbility.usage) {
+				traitUsage = ` *(${specialAbility.usage.type})*`;
+			}
+			const trait = `**${specialAbility.name}${traitUsage}.** ${specialAbility.desc.replace('\n\n', '\n')}\n`;
+			desc.push(trait);
+		}
 	}
 
 	return {
@@ -236,6 +245,10 @@ module.exports = {
  *			components_required: string[],
  *			dc: Number,
  *			spells: Spell[]
+ * 		},
+ * 		usage: {
+ * 			times: Number,
+ * 			type: String
  * 		}
  * }} SpecialAbility
  */
