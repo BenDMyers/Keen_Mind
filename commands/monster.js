@@ -140,6 +140,12 @@ async function getMonsterDetails(matchedMonster) {
 	}
 	desc.push('');
 
+	// Traits
+	for(const specialAbility of monster.special_abilities) {
+		const trait = `**${specialAbility.name}.** ${specialAbility.desc.replace('\n\n', '\n')}\n`;
+		desc.push(trait);
+	}
+
 	return {
 		color: RED,
 		title: monster.name,
