@@ -4,7 +4,7 @@ const {YELLOW, GRAY, BLUE, GREEN} = require('../utils/colors');
 const parseTable = require('../utils/parse-table');
 const {indexify, sluggify} = require('../utils/sluggify');
 
-const filteredOutProperties = ['monk', 'special'];
+const filteredOutProperties = ['_id', 'monk', 'special'];
 const armorCategories = ['Heavy', 'Medium', 'Light']; // for armor-armor, not shields and such
 const placeholderDetail = {name: '\u200B', value: '\u200B', inline: true};
 
@@ -222,6 +222,7 @@ function getArmorDetails(armor) {
  * 		range: {long: Number, normal: Number},
  * 		special: String,
  * 		throw_range: {long: Number, normal: Number},
+ * 		two_handed_damage: {damage_dice: String, damage_type: {name: String}},
  * 		weight: Number
  * }} weapon Weapon item returned from the 5e API
  * @returns {{color: Number, title: String, description: String, fields: [{name: String, value: String, inline: Boolean}]}} Discord Embed object to use in the response
@@ -239,8 +240,9 @@ function getWeaponDetails(weapon) {
 		fields.push({name: 'Damage', value: damage.join(' '), inline: true});
 	}
 
-	if (weapon['2h_damage']) {
-		const twoHandedDamage = `${weapon['2h_damage'].damage_dice} ${weapon['2h_damage'].damage_type.name}`;
+	const twoHanded = weapon.two_handed_damage || weapon['2h_damage'];
+	if (twoHanded) {
+		const twoHandedDamage = `${twoHanded.damage_dice} ${twoHanded.damage_type.name}`;
 		fields.push({name: 'Two-Handed Damage', value: twoHandedDamage, inline: true});
 	}
 

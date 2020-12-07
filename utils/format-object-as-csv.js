@@ -14,7 +14,7 @@ function formatKey(key) {
  * @param {Object} obj any arbitrary object
  * @returns {string} comma-separated key–value pairs
  */
-function formatObjectAsCsv(obj) {
+function formatObjectAsCsv({_id, ...obj}) {
 	if (Object.keys(obj).length === 0) {
 		return '';
 	}
