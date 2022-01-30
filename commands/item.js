@@ -38,6 +38,7 @@ async function getItemDetails(matchedItem) {
 		case 'weapon':
 			return getWeaponDetails(item);
 		case 'wondrous item':
+		case 'wondrous-items':
 			return getWondrousItemDetails(item);
 		default:
 			return getAdventuringGearDetails(item);
