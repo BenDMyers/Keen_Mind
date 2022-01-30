@@ -357,6 +357,9 @@ async function getWondrousItemDetails(wondrousItem) {
 			fields = parsedTable.fields;
 			footer = parsedTable.footer;
 		} else {
+			if (wondrousItem.desc.length > 1 && wondrousItem.desc[0].startsWith('Wondrous')) {
+				wondrousItem.desc[0] = `***${wondrousItem.desc[0]}***`;
+			}
 			description = wondrousItem.desc.join('\n\n');
 		}
 	}
