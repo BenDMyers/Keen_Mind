@@ -54,7 +54,9 @@ async function getSpellDetails(matchedSpell) {
 		const {type, size} = spell.area_of_effect;
 		fields.push({name: 'Area of Effect', value: `${size}-ft ${type}`, inline: true});
 	}
-	if (spell.higher_level) fields.push({name: 'At Higher Levels', value: spell.higher_level});
+	if (spell.higher_level && spell.higher_level.length) {
+		fields.push({name: 'At Higher Levels', value: spell.higher_level});
+	}
 	if (spell.classes && spell.classes.length) {
 		const classes = spell.classes.map(cls => cls.name);
 		const formattedClasses = classes.join(', ');
@@ -120,6 +122,7 @@ module.exports = {
 				spellDetails.footer = {text: `---\nI also found:\n${alternatives}`};
 			}
 
+			console.log('EXACT', spellDetails);
 			const reply = await message.channel.send({embed: spellDetails});
 			if (index === 'fireball') reply.react('🔥');
 		} else if (spells.count === 1) {
@@ -127,6 +130,7 @@ module.exports = {
 			const spellDetails = await getSpellDetails(bestGuess);
 			spellDetails.footer = {text: '---\nThis was my best guess! Feel free to search again!'};
 
+			console.log('BEST GUESS', spellDetails);
 			message.channel.send({embed: spellDetails});
 		} else {
 			const alternatives = spells.results.map(alt => `* ${alt.name}`);
