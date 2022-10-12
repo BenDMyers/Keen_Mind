@@ -122,7 +122,6 @@ module.exports = {
 				spellDetails.footer = {text: `---\nI also found:\n${alternatives}`};
 			}
 
-			console.log('EXACT', spellDetails);
 			const reply = await message.channel.send({embed: spellDetails});
 			if (index === 'fireball') reply.react('🔥');
 		} else if (spells.count === 1) {
@@ -130,7 +129,6 @@ module.exports = {
 			const spellDetails = await getSpellDetails(bestGuess);
 			spellDetails.footer = {text: '---\nThis was my best guess! Feel free to search again!'};
 
-			console.log('BEST GUESS', spellDetails);
 			message.channel.send({embed: spellDetails});
 		} else {
 			const alternatives = spells.results.map(alt => `* ${alt.name}`);
