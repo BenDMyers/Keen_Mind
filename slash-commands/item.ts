@@ -1,20 +1,23 @@
+import type { ApiReferenceList, Equipment, MagicItem } from '../types/dnd-api';
 import fetch from 'node-fetch'
-import {SlashCommandBuilder} from 'discord.js';
-import {sluggify, indexify} from '../utils/sluggify';
+import { SlashCommandBuilder } from 'discord.js';
+import { sluggify, indexify } from '../utils/sluggify';
 import { CommandConfig } from '../types/slash-command';
 
 /**
- * @param {string} query requested item name
- * @returns {{count: number, results: any[]}}
+ * @param query requested item name
  */
 async function fetchItems(query: string) {
-	const standardItems = await fetch(`https://www.dnd5eapi.co/api/equipment?name=${query}`)
-		.then(res => res.json());
-	const magicItems = await fetch(`https://www.dnd5eapi.co/api/magic-items?name=${query}`)
-		.then(res => res.json());
+	const equipment: ApiReferenceList = await fetch(
+		`https://www.dnd5eapi.co/api/equipment?name=${query}`
+	).then(res => res.json());
 
-	const count = (standardItems.count || 0) + (magicItems.count || 0);
-	const results = [...(standardItems.results || []), ...(magicItems.results || [])];
+	const magicItems: ApiReferenceList = await fetch(
+		`https://www.dnd5eapi.co/api/magic-items?name=${query}`
+	).then(res => res.json());
+
+	const count = (equipment.count || 0) + (magicItems.count || 0);
+	const results = [...(equipment.results || []), ...(magicItems.results || [])];
 	return {count, results};
 }
 
@@ -28,9 +31,6 @@ const command: CommandConfig = {
 				.setDescription('Name of the armor, weapon, or other item')
 				.setRequired(true)
 		)),
-	/**
-	 * @param {import('discord.js').ChatInputCommandInteraction} interaction
-	 */
 	async execute(interaction) {
 		const itemName = interaction.options.getString('name');
 
@@ -38,9 +38,9 @@ const command: CommandConfig = {
 
 		try {
 			const query = sluggify([itemName]);
-			const {count /* , results */ } = await fetchItems(query);
-			// const apiIndex = indexify(itemName);
-			// const exactMatch = results.find(item => (item.index === apiIndex));
+			const {count, results} = await fetchItems(query);
+			const apiIndex = indexify([itemName]);
+			const exactMatch = results.find(item => (item.index === apiIndex));
 
 			if (count === 0) {
 				interaction.reply(`I couldn't find any items called _${itemName}_. Try again with a shorter query`);
