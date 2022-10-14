@@ -11,6 +11,14 @@ import formatAdventuringGearEmbed from '../replies/format-adventuring-gear-embed
 const BASE_URL = 'https://www.dnd5eapi.co';
 const placeholderDetail = {name: '\u200B', value: '\u200B', inline: true};
 
+async function fetchAllItems() {
+	const allEquipment: ApiReferenceList = await fetch(BASE_URL + '/api/equipment/').then(res => res.json());
+	const allMagicItems: ApiReferenceList = await fetch(BASE_URL + '/api/magic-items/').then(res => res.json());
+	const allItems = [...allEquipment.results, ...allMagicItems.results].map(item => item.name);
+	allItems.sort();
+	return allItems;
+}
+
 /**
  * @param query requested item name, formatted for query strings
  */
@@ -60,6 +68,7 @@ const command: CommandConfig = {
 				.setName('name')
 				.setDescription('Name of the armor, weapon, or other item')
 				.setRequired(true)
+				.setAutocomplete(true)
 		)),
 	async execute(interaction) {
 		const itemName = interaction.options.getString('name');
@@ -91,7 +100,8 @@ const command: CommandConfig = {
 		} catch (err) {
 			console.error(err);
 		}
-	}
+	},
+	autocompleteOptions: fetchAllItems().then(items => items.map(item => ({name: item, value: item})))
 };
 
 export default command;

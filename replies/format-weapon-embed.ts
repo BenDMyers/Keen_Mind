@@ -39,16 +39,20 @@ export function formatProperties(properties: ApiReference[]) {
 function addWeaponDetails(embed: EmbedBuilder, weapon: Weapon) {
 	const {damage, two_handed_damage} = weapon;
 
-	const formattedDamage = formatDamage(damage);
-	embed.addFields({name: 'Damage', value: formattedDamage, inline: true});
+	if (damage) {
+		const formattedDamage = formatDamage(damage);
+		embed.addFields({name: 'Damage', value: formattedDamage, inline: true});
+	}
 
 	if (two_handed_damage) {
 		const formattedTwoHandedDamage = formatDamage(two_handed_damage);
 		embed.addFields({name: 'Two-Handed Damage', value: formattedTwoHandedDamage, inline: true});
 	}
 
-	const formattedRange = formatRange(weapon.range);
-	embed.addFields({name: 'Range', value: formattedRange, inline: true});
+	if (weapon.range) {
+		const formattedRange = formatRange(weapon.range);
+		embed.addFields({name: 'Range', value: formattedRange, inline: true});
+	}
 
 	if (weapon.throw_range) {
 		const formattedThrowRange = formatRange(weapon.throw_range);
@@ -73,10 +77,20 @@ function addWeaponDetails(embed: EmbedBuilder, weapon: Weapon) {
 function addWeaponDescription(mainEmbed: EmbedBuilder, weapon: Weapon, allEmbeds: EmbedBuilder[]) {
 	const lines: string[] = [];
 
-	const subtitle = `${weapon.category_range} Weapon`;
-	lines.push(bold(italic(subtitle)));
-
 	const providedDescription = weapon.special?.length ? weapon.special : weapon.desc;
+
+	if (Array.isArray(providedDescription) && providedDescription.length > 0 && providedDescription[0].includes('Weapon')) {
+		const subtitle = providedDescription.shift() as string;
+		lines.push(bold(italic(subtitle)));
+	} else {
+		const subtitleBits: string[] = ['Weapon'];
+		if (weapon.category_range) {
+			subtitleBits.unshift(weapon.category_range);
+		}
+		const subtitle = subtitleBits.join(' ');
+		lines.push(bold(italic(subtitle)));
+	}
+
 	if (Array.isArray(providedDescription)) {
 		const {description, tables} = extractTables(providedDescription);
 		const tableEmbeds = tables.map(table => createTableEmbed(table, YELLOW));

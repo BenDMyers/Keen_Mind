@@ -1,5 +1,5 @@
 require('dotenv').config();
-import { Interaction } from 'discord.js';
+import { ChatInputCommandInteraction, Interaction } from 'discord.js';
 import fs from 'fs';
 import path from 'path';
 import { CommandConfig } from './types/slash-command';
@@ -22,38 +22,36 @@ const client = new Client({
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = (await import(filePath)).default as CommandConfig;
+		if ((command.autocompleteOptions as Promise<any>)?.then) {
+			command.autocompleteOptions = await command.autocompleteOptions;
+		}
 		// Set a new item in the Collection
 		// With the key as the command name and the value as the exported module
 		console.log(command);
 		client.commands.set(command.data.name, command);
 	}
 })();
-// const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-// for (const file of commandFiles) {
-// 	const command = require(`./commands/${file}`);
-// 	client.commands.set(command.name, command);
-// 	client.commands.set(command.name.charAt(0), command);
-// }
-
-// client.on('message', (message) => {
-// 	if (message.author.bot || !message.content.startsWith(prefix)) return;
-
-// 	const args = message.content.slice(prefix.length).trim().split(/ +/);
-// 	const commandName = args.shift().toLowerCase();
-
-// 	if (!client.commands.has(commandName)) return;
-
-// 	const command = client.commands.get(commandName);
-// 	command.execute(message, args);
-// });
 
 client.on('interactionCreate', async (interaction: Interaction) => {
-	if (!interaction.isChatInputCommand()) return;
-	
 	const interactionClient = interaction.client as CustomDiscordClient;
 
-	const command = interactionClient.commands.get(interaction.commandName);
+	console.log('ZEBRA')
+	const command = interactionClient.commands.get((interaction as ChatInputCommandInteraction).commandName);
+	console.log('GIRAFFE')
 	if (!command) return;
+	console.log('PLATYPUS')
+
+	if (interaction.isAutocomplete() && command.autocompleteOptions) {
+		console.log('QUAGGA')
+		const focusedValue = interaction.options.getFocused().toLowerCase();
+		const options = (command.autocompleteOptions as {name: string, value: string}[]);
+		const completions = options
+			.filter(option => option.name.toLowerCase().includes(focusedValue))
+			.slice(0, 25);
+		await interaction.respond(completions);
+	}
+
+	if (!interaction.isChatInputCommand()) return;
 
 	try {
 		await command.execute(interaction);
