@@ -44,20 +44,28 @@ export type Weapon = BaseEquipment & {
 	weapon_range: 'Melee' | 'Ranged';
 	category_range: string;
 	range: Range;
+	throw_range?: Range;
 	damage: Damage;
 	two_handed_damage?: Damage;
 	properties: ApiReference[];
+	special?: string[];
 }
 
 export type Armor = BaseEquipment & {
 	armor_category: string;
-	armor_class: {[key: string]: string;};
+	armor_class: {
+		base?: number;
+		dex_bonus?: boolean;
+		max_bonus?: number;
+	};
 	str_minimum: number;
 	stealth_disadvantage: boolean;
 }
 
 export type Gear = BaseEquipment & {
 	gear_category: ApiReference;
+	contents?: ApiReference[];
+	properties?: ApiReference[];
 }
 
 export type EquipmentPack = BaseEquipment & {
@@ -65,12 +73,25 @@ export type EquipmentPack = BaseEquipment & {
 	contents: ApiReference[];
 }
 
-export type Equipment = Armor | EquipmentPack | Gear | Weapon;
+export type MountOrVehicle = BaseEquipment & {
+	vehicle_category: string;
+	speed?: {
+		quantity: number;
+		unit: string;
+	},
+	capacity?: string;
+}
+
+export type Tool = BaseEquipment & {
+	tool_category: string;
+}
+
+export type Equipment = Armor | EquipmentPack | Gear | MountOrVehicle | Tool | Weapon;
 
 type Rarity = 'Varies' | 'Common' | 'Uncommon' | 'Rare' | 'Very Rare' | 'Legendary' | 'Artifact';
 
 export type MagicItem = ApiReference & {
-	desc: string;
+	desc: string | string[];
 	equipment_category: ApiReference;
 	rarity: {
 		name: Rarity;

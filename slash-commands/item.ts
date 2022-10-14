@@ -1,24 +1,54 @@
-import type { ApiReferenceList, Equipment, MagicItem } from '../types/dnd-api';
+import type { ApiReference, ApiReferenceList, Armor, Equipment, Gear, MagicItem, Weapon } from '../types/dnd-api';
 import fetch from 'node-fetch'
 import { SlashCommandBuilder } from 'discord.js';
 import { sluggify, indexify } from '../utils/sluggify';
 import { CommandConfig } from '../types/slash-command';
+import formatArmorEmbed from '../replies/format-armor-embed';
+import formatWeaponEmbed from '../replies/format-weapon-embed';
+import formatWondrousItemEmbed from '../replies/format-wondrous-item-embed';
+import formatAdventuringGearEmbed from '../replies/format-adventuring-gear-embed';
+
+const BASE_URL = 'https://www.dnd5eapi.co';
+const placeholderDetail = {name: '\u200B', value: '\u200B', inline: true};
 
 /**
- * @param query requested item name
+ * @param query requested item name, formatted for query strings
  */
 async function fetchItems(query: string) {
 	const equipment: ApiReferenceList = await fetch(
-		`https://www.dnd5eapi.co/api/equipment?name=${query}`
+		`${BASE_URL}/api/equipment?name=${query}`
 	).then(res => res.json());
 
 	const magicItems: ApiReferenceList = await fetch(
-		`https://www.dnd5eapi.co/api/magic-items?name=${query}`
+		`${BASE_URL}/api/magic-items?name=${query}`
 	).then(res => res.json());
 
 	const count = (equipment.count || 0) + (magicItems.count || 0);
 	const results = [...(equipment.results || []), ...(magicItems.results || [])];
-	return {count, results};
+	return {count, results} as ApiReferenceList;
+}
+
+async function fetchItemDetails(matchedItem: ApiReference) {
+	const {index} = matchedItem;
+	const endpoint = matchedItem.url ?? `/api/magic-items/${index}`;
+	const url = BASE_URL + endpoint;
+	const item: Equipment | MagicItem = await fetch(url).then(res => res.json());
+	return item;
+}
+
+function formatItemEmbeds(item: Equipment | MagicItem) {
+	const equipmentCategory = item.equipment_category.index || item.equipment_category.name.toLowerCase();
+	switch (equipmentCategory) {
+		case 'armor':
+			return formatArmorEmbed(item as Armor);
+		case 'weapon':
+			return formatWeaponEmbed(item as Weapon);
+		case 'wondrous-items':
+		case 'wondrous item':
+			return formatWondrousItemEmbed(item as MagicItem);
+		default:
+			return formatAdventuringGearEmbed(item as Gear);
+	}
 }
 
 const command: CommandConfig = {
@@ -44,6 +74,19 @@ const command: CommandConfig = {
 
 			if (count === 0) {
 				interaction.reply(`I couldn't find any items called _${itemName}_. Try again with a shorter query`);
+			}
+
+			const item = exactMatch || results[0];
+			if (item) {
+				const itemDetails = await fetchItemDetails(item);
+				const embeds = formatItemEmbeds(itemDetails);
+				for (const embed of embeds) {
+					const embedJson = embed.toJSON();
+					if (embedJson.fields?.length && embedJson.fields.length % 3 === 2) {
+						embed.addFields(placeholderDetail);
+					}
+				}
+				interaction.reply({embeds});
 			}
 		} catch (err) {
 			console.error(err);
