@@ -1,6 +1,7 @@
 import { bold, italic, EmbedBuilder } from "@discordjs/builders";
 import type { Equipment, EquipmentPack, Gear, MountOrVehicle, Tool } from "../types/dnd-api";
 import { GRAY } from "../utils/colors";
+import { formatNumberWithCommas } from "../utils/format-numbers";
 import { formatProperties } from "./format-weapon-embed";
 import { createTableEmbed, extractTables } from "./tables";
 
@@ -16,7 +17,7 @@ function addAdventuringGearDetails(mainEmbed: EmbedBuilder, gear: Equipment) {
 	}
 
 	if (gear.cost) {
-		const cost = `${gear.cost.quantity} ${gear.cost.unit}`;
+		const cost = `${formatNumberWithCommas(gear.cost.quantity)} ${gear.cost.unit}`;
 		mainEmbed.addFields({name: 'Cost', value: cost, inline: true});
 	}
 

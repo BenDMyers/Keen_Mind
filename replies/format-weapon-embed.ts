@@ -1,6 +1,7 @@
 import { bold, italic, EmbedBuilder } from "@discordjs/builders";
 import type { ApiReference, Damage, Range, Weapon } from "../types/dnd-api";
 import { YELLOW } from "../utils/colors";
+import { formatNumberWithCommas } from "../utils/format-numbers";
 import { createTableEmbed, extractTables } from "./tables";
 
 const filteredOutProperties = ['_id', 'monk', 'special'];
@@ -60,7 +61,7 @@ function addWeaponDetails(embed: EmbedBuilder, weapon: Weapon) {
 	}
 
 	if (weapon.cost) {
-		const cost = `${weapon.cost.quantity} ${weapon.cost.unit}`;
+		const cost = `${formatNumberWithCommas(weapon.cost.quantity)} ${weapon.cost.unit}`;
 		embed.addFields({name: 'Cost', value: cost, inline: true});
 	}
 

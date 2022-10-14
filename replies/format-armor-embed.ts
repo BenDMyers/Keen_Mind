@@ -1,6 +1,7 @@
 import { bold, italic, EmbedBuilder } from "@discordjs/builders";
 import type { Armor } from "../types/dnd-api";
 import { BLUE } from "../utils/colors";
+import { formatNumberWithCommas } from "../utils/format-numbers";
 
 const armorCategories = ['Heavy', 'Medium', 'Light'];
 
@@ -48,7 +49,7 @@ function addArmorDetails(embed: EmbedBuilder, armor: Armor) {
 
 	if (armor.cost) {
 		const cost: string[] = [];
-		if (armor.cost.quantity) cost.push(armor.cost.quantity.toString());
+		if (armor.cost.quantity) cost.push(formatNumberWithCommas(armor.cost.quantity));
 		if (armor.cost.unit) cost.push(armor.cost.unit);
 		embed.addFields({name: 'Cost', value: cost.join(' '), inline: true});
 	}
