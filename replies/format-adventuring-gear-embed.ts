@@ -1,10 +1,20 @@
 import { bold, italic, EmbedBuilder } from "@discordjs/builders";
-import type { Equipment, Gear, MountOrVehicle, Tool } from "../types/dnd-api";
+import type { Equipment, EquipmentPack, Gear, MountOrVehicle, Tool } from "../types/dnd-api";
 import { GRAY } from "../utils/colors";
 import { formatProperties } from "./format-weapon-embed";
 import { createTableEmbed, extractTables } from "./tables";
 
 function addAdventuringGearDetails(mainEmbed: EmbedBuilder, gear: Equipment) {
+	const {contents} = gear as EquipmentPack;
+	if (contents?.length) {
+		const contentsList: string[] = [];
+		for (const content of contents) {
+			const {quantity, item: {name}} = content;
+			contentsList.push(bold(`${quantity}x`) + ' ' + name);
+		}
+		mainEmbed.addFields({name: 'Contents', value: contentsList.join('\n'), inline: true});
+	}
+
 	if (gear.cost) {
 		const cost = `${gear.cost.quantity} ${gear.cost.unit}`;
 		mainEmbed.addFields({name: 'Cost', value: cost, inline: true});

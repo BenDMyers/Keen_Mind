@@ -70,7 +70,7 @@ export type Gear = BaseEquipment & {
 
 export type EquipmentPack = BaseEquipment & {
 	gear_category: ApiReference;
-	contents: ApiReference[];
+	contents: {item: ApiReference; quantity: number;}[];
 }
 
 export type MountOrVehicle = BaseEquipment & {
