@@ -6,3 +6,4 @@ export const YELLOW = 0xF8C300;	// weapons
 export const RED = 0xF93A2F;	// monsters
 export const ORANGE = 0xCC7900;
 export const GRAY = 0x597E8D;
+export const BLACK = 0x000000;

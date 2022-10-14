@@ -7,9 +7,7 @@ import formatArmorEmbed from '../replies/format-armor-embed';
 import formatWeaponEmbed from '../replies/format-weapon-embed';
 import formatWondrousItemEmbed from '../replies/format-wondrous-item-embed';
 import formatAdventuringGearEmbed from '../replies/format-adventuring-gear-embed';
-
-const BASE_URL = 'https://www.dnd5eapi.co';
-const placeholderDetail = {name: '\u200B', value: '\u200B', inline: true};
+import { BASE_URL, placeholderDetail } from '../utils/constants';
 
 async function fetchAllItems() {
 	const allEquipment: ApiReferenceList = await fetch(BASE_URL + '/api/equipment/').then(res => res.json());

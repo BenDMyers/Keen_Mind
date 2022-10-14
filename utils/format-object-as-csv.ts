@@ -1,9 +1,9 @@
 /**
  * Formats an object key by removing underscores and applying proper capitialization
- * @param {string} key object key
- * @returns {string} formatted key
+ * @param key object key
+ * @returns formatted key
  */
-function formatKey(key) {
+function formatKey(key: string) {
 	return key
 		.replace(/_/g, ' ')
 		.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1));
@@ -11,10 +11,10 @@ function formatKey(key) {
 
 /**
  * Converts an object to a comma-separated list of its key–value pairs
- * @param {Object} obj any arbitrary object
- * @returns {string} comma-separated key–value pairs
+ * @param obj any arbitrary object
+ * @returns comma-separated key–value pairs
  */
-function formatObjectAsCsv({_id, ...obj}) {
+function formatObjectAsCsv({_id, ...obj}: any) {
 	if (Object.keys(obj).length === 0) {
 		return '';
 	}
@@ -24,4 +24,4 @@ function formatObjectAsCsv({_id, ...obj}) {
 		.join(', ');
 }
 
-module.exports = formatObjectAsCsv;
+export default formatObjectAsCsv;

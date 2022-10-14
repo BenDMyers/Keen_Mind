@@ -104,7 +104,7 @@ export type MonsterSize = 'Tiny' | 'Small' | 'Medium' | 'Large' | 'Huge' | 'Garg
 export type Alignment = 'chaotic neutral' | 'chaotic evil' | 'chaotic good' | 'lawful neutral' | 'lawful evil' | 'lawful good' | 'neutral' | 'neutral evil' | 'neutral good' | 'any alignment' | 'unaligned';
 export type ActionType = 'melee' | 'ranged' | 'ability' | 'magic';
 
-type MonsterAction = {
+export type MonsterAction = {
 	name: string;
 	desc: string;
 	action_options: Choice;
@@ -117,7 +117,7 @@ type MonsterAction = {
 	damage: Damage[];
 }
 
-type Usage = {
+export type Usage = {
 	type: 'at will' | 'per day' | 'recharge after rest' | 'recharge on roll';
 	rest_types: string[];
 	times: number;
@@ -130,7 +130,7 @@ type Spell = {
 	usage: Usage;
 }
 
-type SpecialAbility = {
+export type SpecialAbility = {
 	name: string;
 	desc: string;
 	attack_bonus: number;
@@ -148,9 +148,17 @@ type SpecialAbility = {
 	usage: Usage;
 }
 
-type Proficiency = {
+export type Proficiency = {
 	value: number;
 	proficiency: ApiReference;
+}
+
+export type Speed = {
+	walk: string;
+	burrow?: string;
+	climb?: string;
+	fly?: string;
+	swim?: string;
 }
 
 export type Monster = ApiReference & {
@@ -189,12 +197,6 @@ export type Monster = ApiReference & {
 		tremorsense?: string;
 		truesight?: string;
 	}
-	speed: {
-		walk: string;
-		burrow?: string;
-		climb?: string;
-		fly?: string;
-		swim?: string;
-	};
+	speed?: Speed;
 	xp: number;
 }
