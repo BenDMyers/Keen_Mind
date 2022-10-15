@@ -35,14 +35,10 @@ const client = new Client({
 client.on('interactionCreate', async (interaction: Interaction) => {
 	const interactionClient = interaction.client as CustomDiscordClient;
 
-	console.log('ZEBRA')
 	const command = interactionClient.commands.get((interaction as ChatInputCommandInteraction).commandName);
-	console.log('GIRAFFE')
 	if (!command) return;
-	console.log('PLATYPUS')
 
 	if (interaction.isAutocomplete() && command.autocompleteOptions) {
-		console.log('QUAGGA')
 		const focusedValue = interaction.options.getFocused().toLowerCase();
 		const options = (command.autocompleteOptions as {name: string, value: string}[]);
 		const completions = options
