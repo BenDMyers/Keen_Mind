@@ -53,7 +53,7 @@ const command: CommandConfig = {
 			const exactMatch = results.find(item => (item.index === apiIndex));
 
 			if (count === 0) {
-				interaction.reply(`I couldn't find any items called _${monsterName}_. Try again with a shorter query`);
+				interaction.reply(`I couldn't find any monsters called _${monsterName}_. Try again with a shorter query`);
 			}
 
 			const monster = exactMatch || results[0];

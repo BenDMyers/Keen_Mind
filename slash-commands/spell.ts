@@ -53,7 +53,7 @@ const command: CommandConfig = {
 			const exactMatch = results.find(item => (item.index === apiIndex));
 
 			if (count === 0) {
-				interaction.reply(`I couldn't find any items called _${spellName}_. Try again with a shorter query`);
+				interaction.reply(`I couldn't find any spells called _${spellName}_. Try again with a shorter query`);
 			}
 
 			const spell = exactMatch || results[0];
