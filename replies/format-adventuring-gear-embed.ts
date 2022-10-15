@@ -46,9 +46,12 @@ function addAdventuringGearDetails(mainEmbed: EmbedBuilder, gear: Equipment) {
 
 function addAdventuringGearDescription(mainEmbed: EmbedBuilder, gear: Equipment, allEmbeds: EmbedBuilder[]) {
 	let lines: string[] = [];
+	const {desc} = gear;
 
 	let subtitle = 'Adventuring Gear';
-	if (gear.equipment_category) {
+	if (Array.isArray(desc) && desc?.length && desc[0].includes('Potion')) {
+		subtitle = desc.shift() || '';
+	} else if (gear.equipment_category) {
 		switch(gear.equipment_category.index) {
 			case 'tools':
 				const {tool_category} = gear as Tool;
@@ -68,8 +71,6 @@ function addAdventuringGearDescription(mainEmbed: EmbedBuilder, gear: Equipment,
 	}
 
 	lines.push(bold(italic(subtitle)));
-
-	const {desc} = gear;
 
 	if (Array.isArray(desc) && desc.length > 0) {
 		const {description, tables} = extractTables(desc);
