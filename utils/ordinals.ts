@@ -1,9 +1,9 @@
 /**
  * Convert a number to its ordinal format
- * @param {Number} number the number to be ordinalized
- * @returns {String} the ordinal-formatted version of `number`
+ * @param number the number to be ordinalized
+ * @returns the ordinal-formatted version of `number`
  */
-function ordinal(number) {
+function ordinal(number: number) {
 	if (number >= 11 && number <= 19) {
 		return `${number}th`;
 	}
@@ -22,4 +22,4 @@ function ordinal(number) {
 	}
 }
 
-module.exports = ordinal;
+export default ordinal;

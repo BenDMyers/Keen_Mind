@@ -13,7 +13,7 @@ async function fetchAllMonsters() {
 }
 
 /**
- * @param query requested item name, formatted for query strings
+ * @param query requested monster name, formatted for query strings
  */
  async function fetchMonsters(query: string) {
 	const monsters: ApiReferenceList = await fetch(

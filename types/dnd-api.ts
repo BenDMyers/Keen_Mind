@@ -123,7 +123,7 @@ export type Usage = {
 	times: number;
 };
 
-type Spell = {
+type MonsterSpell = {
 	name: string;
 	level: number;
 	url: string;
@@ -143,7 +143,7 @@ export type SpecialAbility = {
 		components_required: string[];
 		school: string;
 		slots: {[key: string]: number};
-		spells: Spell[];
+		spells: MonsterSpell[];
 	};
 	usage: Usage;
 }
@@ -199,4 +199,34 @@ export type Monster = ApiReference & {
 	}
 	speed?: Speed;
 	xp: number;
+}
+
+export type SpellComponent = 'V' | 'S' | 'M';
+export type AreaOfEffect = {
+	size: number;
+	type: 'sphere' | 'cone' | 'cylinder' | 'line';
+};
+
+export type Spell = ApiReference & {
+	desc?: string[];
+	higher_level?: string[];
+	range: string;
+	components: SpellComponent[];
+	material?: string;
+	ritual: boolean;
+	duration: string;
+	area_of_effect?: AreaOfEffect;
+	concentration: boolean;
+	casting_time: string;
+	level: number;
+	attack_type: string;
+	damage?: {
+		damage_at_character_level?: {[key: string]: string};
+		damage_at_slot_level?: {[key: string]: string};
+		damage_type: ApiReference;
+	};
+	dc?: DifficultyCheck;
+	school: ApiReference;
+	classes: ApiReference[];
+	subclasses: ApiReference[];
 }
