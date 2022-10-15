@@ -4,7 +4,7 @@
  * @param {String} delimiter character(s) used to separate multiple words in the query
  * @returns {String} Args formatted to be used in a URL as a query
  */
-const sluggify = (args) => {
+export const sluggify = (args: string[]) => {
 	return args
 		.map(arg => arg.replace(/'/g, '%27'))
 		.join('+')
@@ -17,7 +17,7 @@ const sluggify = (args) => {
  * @param {String} delimiter character(s) used to separate multiple words in the query
  * @returns {String} Args formatted like an `index` in a 5e API object
  */
-const indexify = (args) => {
+export const indexify = (args: string[]) => {
 	console.log(args);
 	return args
 		.map(arg => arg
@@ -26,5 +26,3 @@ const indexify = (args) => {
 		.join('-')
 		.toLowerCase();
 };
-
-module.exports = {sluggify, indexify};
