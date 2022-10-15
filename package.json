@@ -18,7 +18,6 @@
     "rpgdicejs": "^2.0.0-rc.3"
   },
   "devDependencies": {
-    "@types/": "dice-roller/rpg-dice-roller",
     "@types/node": "^18.8.5",
     "@types/node-fetch": "^2.6.2",
     "eslint": "^7.10.0",
