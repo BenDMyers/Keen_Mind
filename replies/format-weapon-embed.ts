@@ -69,7 +69,7 @@ function addWeaponDetails(embed: EmbedBuilder, weapon: Weapon) {
 		embed.addFields({name: 'Weight', value: `${weapon.weight} lbs`, inline: true});
 	}
 
-	if (weapon.properties) {
+	if (weapon.properties?.length) {
 		const formattedProperties = formatProperties(weapon.properties);
 		embed.addFields({name: 'Properties', value: formattedProperties, inline: true});
 	}
