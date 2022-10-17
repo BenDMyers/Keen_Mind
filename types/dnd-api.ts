@@ -230,3 +230,7 @@ export type Spell = ApiReference & {
 	classes: ApiReference[];
 	subclasses: ApiReference[];
 }
+
+export type Condition = ApiReference & {
+	desc: string[]
+};

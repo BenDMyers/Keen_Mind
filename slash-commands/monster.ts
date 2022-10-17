@@ -5,6 +5,7 @@ import type { CommandConfig } from "../types/slash-command";
 import { BASE_URL, placeholderDetail } from "../utils/constants";
 import { indexify, sluggify } from '../utils/sluggify';
 import { formatMonsterEmbed } from '../replies/format-monster-embed';
+import { createAutocompleteOptions } from '../utils/map-to-autocomplete';
 
 async function fetchAllMonsters() {
 	const allMonsters: ApiReferenceList = await fetch(BASE_URL + '/api/monsters/')
@@ -72,8 +73,7 @@ const command: CommandConfig = {
 			console.error(err);
 		}
 	},
-	autocompleteOptions: fetchAllMonsters()
-		.then(monsters => monsters.map(monster => ({name: monster, value: monster})))
+	autocompleteOptions: fetchAllMonsters().then(createAutocompleteOptions)
 };
 
 export default command;

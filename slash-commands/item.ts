@@ -8,6 +8,7 @@ import formatWeaponEmbed from '../replies/format-weapon-embed';
 import formatWondrousItemEmbed from '../replies/format-wondrous-item-embed';
 import formatAdventuringGearEmbed from '../replies/format-adventuring-gear-embed';
 import { BASE_URL, placeholderDetail } from '../utils/constants';
+import { createAutocompleteOptions } from '../utils/map-to-autocomplete';
 
 async function fetchAllItems() {
 	const allEquipment: ApiReferenceList = await fetch(BASE_URL + '/api/equipment/').then(res => res.json());
@@ -99,7 +100,7 @@ const command: CommandConfig = {
 			console.error(err);
 		}
 	},
-	autocompleteOptions: fetchAllItems().then(items => items.map(item => ({name: item, value: item})))
+	autocompleteOptions: fetchAllItems().then(createAutocompleteOptions)
 };
 
 export default command;

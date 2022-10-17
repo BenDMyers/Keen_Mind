@@ -4,6 +4,7 @@ import formatSpellEmbed from "../replies/format-spell-embed";
 import type { ApiReference, ApiReferenceList, Spell } from "../types/dnd-api";
 import type { CommandConfig } from "../types/slash-command";
 import { BASE_URL, placeholderDetail } from "../utils/constants";
+import { createAutocompleteOptions } from "../utils/map-to-autocomplete";
 import { indexify, sluggify } from "../utils/sluggify";
 
 async function fetchAllSpells() {
@@ -72,8 +73,7 @@ const command: CommandConfig = {
 			console.error(err);
 		}
 	},
-	autocompleteOptions: fetchAllSpells()
-		.then(spells => spells.map(spell => ({name: spell, value: spell})))
+	autocompleteOptions: fetchAllSpells().then(createAutocompleteOptions)
 };
 
 export default command;
