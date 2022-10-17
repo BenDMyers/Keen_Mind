@@ -6,11 +6,11 @@ import {DiceRoll} from '@dice-roller/rpg-dice-roller';
 const command: CommandConfig = {
 	data: new SlashCommandBuilder()
 		.setName('roll')
-		.setDescription('roll some dice using dice notation')
+		.setDescription('Roll some dice using dice notation')
 		.addStringOption((option) => (
 			option
 				.setName('notation')
-				.setDescription('dice notation for this roll')
+				.setDescription('Dice notation for this roll')
 				.setRequired(true)
 		)),
 	async execute(interaction: ChatInputCommandInteraction) {
