@@ -148,7 +148,8 @@ function addMonsterDescription(mainEmbed: EmbedBuilder, monster: Monster, allEmb
 		);
 	}
 	if (monster.hit_points) {
-		const hitPoints = monster.hit_points.toString() + ' ' + italic(`(${monster.hit_dice})`);
+		const hitDice = monster.hit_points_roll ?? monster.hit_dice;
+		const hitPoints = `${monster.hit_points} ${italic(hitDice)}`;
 		descriptionLines.push(
 			formatNameValuePair('Hit Points', hitPoints)
 		);

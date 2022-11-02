@@ -177,7 +177,7 @@ export type Monster = ApiReference & {
 	armor_class: number;
 	hit_points: number;
 	hit_dice: string;
-	hit_dice_roll: string;
+	hit_points_roll: string;
 	actions: MonsterAction[];
 	legendary_actions?: MonsterAction[];
 	reactions?: MonsterAction[];
