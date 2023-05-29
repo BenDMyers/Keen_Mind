@@ -40,6 +40,6 @@ function formatArmorClassComponent(armorClassReference: ArmorClass) {
 	}
 
 	return parentheticals.length ?
-		`${armorClassReference.value} (${parentheticals.join(' ')})` :
+		`${armorClassReference.value} (${parentheticals.join(', ')})` :
 		armorClassReference.value.toString();
 }
