@@ -1,3 +1,4 @@
+import { italic } from 'discord.js';
 import { ArmorClass } from '../types/dnd-api';
 
 export function formatArmorClass(armorClassReferences: ArmorClass[]) {
@@ -39,7 +40,10 @@ function formatArmorClassComponent(armorClassReference: ArmorClass) {
 			break;
 	}
 
-	return parentheticals.length ?
-		`${armorClassReference.value} (${parentheticals.join(', ')})` :
-		armorClassReference.value.toString();
+	if (parentheticals.length) {
+		const parenthetical = `(${parentheticals.join(', ')})`;
+		return `${armorClassReference.value} ${italic(parenthetical)}`;
+	}
+
+	return armorClassReference.value.toString();
 }
