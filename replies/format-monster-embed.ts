@@ -5,6 +5,7 @@ import { RED } from "../utils/colors";
 import { formatFraction, formatNumberWithCommas } from "../utils/format-numbers";
 import formatObjectAsCsv from "../utils/format-object-as-csv";
 import toTitleCase from "../utils/to-title-case";
+import { formatArmorClass } from "../utils/format-armor-class";
 // import { BASE_URL } from "../utils/constants";
 
 function formatAbilityScore(score: number) {
@@ -142,9 +143,10 @@ function addMonsterDescription(mainEmbed: EmbedBuilder, monster: Monster, allEmb
 		descriptionLines.push(monster.desc, '');
 	}
 
-	if (monster.armor_class) {
+	if (monster.armor_class?.length) {
+		const armorClass = formatArmorClass(monster.armor_class);
 		descriptionLines.push(
-			formatNameValuePair('Armor Class', monster.armor_class.toString())
+			formatNameValuePair('Armor Class', armorClass)
 		);
 	}
 	if (monster.hit_points) {
