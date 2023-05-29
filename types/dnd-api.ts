@@ -1,4 +1,4 @@
-import type { Choice } from "./dnd-api-option-set";
+import type { Choice } from './dnd-api-option-set';
 
 export type ApiReference = {
 	index: string;
@@ -161,6 +161,41 @@ export type Speed = {
 	swim?: string;
 }
 
+type ArmorClassDex = {
+	type: 'dex';
+	value: number;
+	desc?: string;
+};
+
+type ArmorClassNatural = {
+	type: 'natural';
+	value: number;
+	desc?: string;
+};
+
+type ArmorClassArmor = {
+	type: 'armor';
+	value: number;
+	armor?: ApiReference[]; // Equipment
+	desc?: string;
+}
+
+type ArmorClassSpell = {
+	type: 'spell';
+	value: number;
+	spell: ApiReference; // Spell
+	desc?: string;
+}
+
+type ArmorClassCondition = {
+	type: 'condition';
+	value: number;
+	condition: ApiReference; // Condition
+	desc?: string;
+}
+
+export type ArmorClass = ArmorClassDex | ArmorClassNatural | ArmorClassArmor | ArmorClassSpell | ArmorClassCondition;
+
 export type Monster = ApiReference & {
 	desc: string[];
 	charisma: number;
@@ -174,7 +209,7 @@ export type Monster = ApiReference & {
 	type: string;
 	subtype: string;
 	alignment: Alignment;
-	armor_class: number;
+	armor_class?: ArmorClass[];
 	hit_points: number;
 	hit_dice: string;
 	hit_points_roll: string;
