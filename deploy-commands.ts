@@ -13,7 +13,6 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = (await import(filePath)).default as CommandConfig;
-		// @ts-ignore
 		commands.push(command.data.toJSON());
 	}
 	

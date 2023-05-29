@@ -124,7 +124,7 @@ function addSpellDescription(mainEmbed: EmbedBuilder, spell: Spell, allEmbeds: E
 
 	let currentDescriptionLines: string[] = [];
 	let currentEmbed = mainEmbed;
-	for (let line of descriptionLines) {
+	for (const line of descriptionLines) {
 		if ([...currentDescriptionLines, line].join('\n\n').length > 2400) {
 			currentEmbed = new EmbedBuilder().setColor(PURPLE);
 			allEmbeds.push(currentEmbed);

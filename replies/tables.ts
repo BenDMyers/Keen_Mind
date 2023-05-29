@@ -6,7 +6,7 @@ export function extractTables(fullDescription: string[]) {
 	const description: string[] = [];
 	const tables: string[][] = [];
 
-	for (let line of fullDescription) {
+	for (const line of fullDescription) {
 		if (line.startsWith('|')) {
 			// If necessary, start a new table
 			if (!inTableMode) {
