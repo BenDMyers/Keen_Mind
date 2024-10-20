@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import { SlashCommandBuilder } from "discord.js";
 import type { ApiReference, ApiReferenceList, Monster } from "../types/dnd-api";
-import type { CommandBuilder, CommandConfig } from "../types/slash-command";
+import type { CommandConfig } from "../types/slash-command";
 import { BASE_URL, placeholderDetail } from "../utils/constants";
 import { indexify, sluggify } from '../utils/sluggify';
 import { formatMonsterEmbed } from '../replies/format-monster-embed';
@@ -41,7 +41,7 @@ const command: CommandConfig = {
 				.setDescription(`Monster's name`)
 				.setRequired(true)
 				.setAutocomplete(true)
-		)) as CommandBuilder,
+		)),
 	async execute(interaction) {
 		const monsterName = interaction.options.getString('name');
 

@@ -1,4 +1,4 @@
-import type { CommandBuilder, CommandConfig } from '../types/slash-command';
+import type { CommandConfig } from '../types/slash-command';
 import type { ChatInputCommandInteraction } from 'discord.js';
 import {SlashCommandBuilder} from 'discord.js';
 import {DiceRoll} from '@dice-roller/rpg-dice-roller';
@@ -12,12 +12,12 @@ const command: CommandConfig = {
 				.setName('notation')
 				.setDescription('Dice notation for this roll')
 				.setRequired(true)
-		)) as CommandBuilder,
+		)),
 		// .addBooleanOption((option) => (
 		// 	option
 		// 		.setName('private')
 		// 		.setDescription('If the roll if private, only you will be able to see the results.')
-		// )) as CommandBuilder,
+		// )),
 	async execute(interaction: ChatInputCommandInteraction) {
 		const notation = interaction.options.getString('notation');
 		// const ephemeral = !!interaction.options.getBoolean('private');

@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "discord.js";
 import fetch from "node-fetch";
 import formatConditionEmbed from "../replies/format-condition-embed";
 import type { ApiReference, ApiReferenceList, Condition } from "../types/dnd-api";
-import type { CommandBuilder, CommandConfig } from "../types/slash-command";
+import type { CommandConfig } from "../types/slash-command";
 import { BASE_URL, placeholderDetail } from "../utils/constants";
 import { createAutocompleteOptions } from "../utils/map-to-autocomplete";
 import { indexify, sluggify } from "../utils/sluggify";
@@ -38,7 +38,7 @@ const command: CommandConfig = {
 				.setDescription('Condition name')
 				.setRequired(true)
 				.setAutocomplete(true)
-		)) as CommandBuilder,
+		)),
 	autocompleteOptions: fetchAllConditions().then(createAutocompleteOptions),
 	async execute(interaction) {
 		const conditionName = interaction.options.getString('name');
