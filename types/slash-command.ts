@@ -1,6 +1,8 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import type { AutocompleteOption } from "../utils/map-to-autocomplete";
 
+export type CommandBuilder = Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
+
 export type CommandConfig = {
 	data: SlashCommandBuilder | Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup">;
 	execute: (interaction: ChatInputCommandInteraction) => Promise<void>;

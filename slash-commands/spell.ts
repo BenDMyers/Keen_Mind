@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import fetch from "node-fetch";
 import formatSpellEmbed from "../replies/format-spell-embed";
 import type { ApiReference, ApiReferenceList, Spell } from "../types/dnd-api";
-import type { CommandConfig } from "../types/slash-command";
+import type { CommandBuilder, CommandConfig } from "../types/slash-command";
 import { BASE_URL, placeholderDetail } from "../utils/constants";
 import { createAutocompleteOptions } from "../utils/map-to-autocomplete";
 import { indexify, sluggify } from "../utils/sluggify";
@@ -41,7 +41,7 @@ const command: CommandConfig = {
 				.setDescription('Name of the spell')
 				.setRequired(true)
 				.setAutocomplete(true)
-		)),
+		)) as CommandBuilder,
 	async execute(interaction) {
 		const spellName = interaction.options.getString('name');
 

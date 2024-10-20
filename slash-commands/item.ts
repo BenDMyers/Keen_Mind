@@ -2,7 +2,7 @@ import type { ApiReference, ApiReferenceList, Armor, Equipment, Gear, MagicItem,
 import fetch from 'node-fetch'
 import { SlashCommandBuilder } from 'discord.js';
 import { sluggify, indexify } from '../utils/sluggify';
-import { CommandConfig } from '../types/slash-command';
+import { CommandBuilder, CommandConfig } from '../types/slash-command';
 import formatArmorEmbed from '../replies/format-armor-embed';
 import formatWeaponEmbed from '../replies/format-weapon-embed';
 import formatWondrousItemEmbed from '../replies/format-wondrous-item-embed';
@@ -68,7 +68,7 @@ const command: CommandConfig = {
 				.setDescription('Name of the armor, weapon, or other item')
 				.setRequired(true)
 				.setAutocomplete(true)
-		)),
+		)) as CommandBuilder,
 	async execute(interaction) {
 		const itemName = interaction.options.getString('name');
 
