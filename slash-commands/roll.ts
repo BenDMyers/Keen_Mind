@@ -16,7 +16,7 @@ const command: CommandConfig = {
 		.addBooleanOption((option) => (
 			option
 				.setName('private')
-				.setDescription('If the roll if private, only you will be able to see the results.')
+				.setDescription('If the roll is private, only you will be able to see the results.')
 		)),
 	async execute(interaction: ChatInputCommandInteraction) {
 		const notation = interaction.options.getString('notation');
