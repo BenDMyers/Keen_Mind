@@ -12,15 +12,15 @@ const command: CommandConfig = {
 				.setName('notation')
 				.setDescription('Dice notation for this roll')
 				.setRequired(true)
+		))
+		.addBooleanOption((option) => (
+			option
+				.setName('private')
+				.setDescription('If the roll if private, only you will be able to see the results.')
 		)),
-		// .addBooleanOption((option) => (
-		// 	option
-		// 		.setName('private')
-		// 		.setDescription('If the roll if private, only you will be able to see the results.')
-		// )),
 	async execute(interaction: ChatInputCommandInteraction) {
 		const notation = interaction.options.getString('notation');
-		// const ephemeral = !!interaction.options.getBoolean('private');
+		const ephemeral = !!interaction.options.getBoolean('private');
 
 		if (!notation) return;
 
@@ -29,24 +29,21 @@ const command: CommandConfig = {
 			const response = `\`${roll.output}\`\n= **${roll.total}**`;
 
 			if (response.length >= 2000) {
-				await interaction.reply(`Trust me, you rolled a **${roll.total}**.`);
-				// await interaction.reply({
-				// 	content: `Trust me, you rolled a **${roll.total}**.`,
-				// 	ephemeral
-				// });
+				await interaction.reply({
+					content: `Trust me, you rolled a **${roll.total}**.`,
+					ephemeral
+				});
 			} else {
-				await interaction.reply(response);
-				// await interaction.reply({
-				// 	content: response,
-				// 	ephemeral
-				// });
+				await interaction.reply({
+					content: response,
+					ephemeral
+				});
 			}
 		} catch (err) {
-			await interaction.reply(`Sorry! That wasn't a valid roll!`);
-			// await interaction.reply({
-			// 	content: 'Sorry! That wasn\'t a valid roll!',
-			// 	ephemeral
-			// });
+			await interaction.reply({
+				content: 'Sorry! That wasn\'t a valid roll!',
+				ephemeral
+			});
 		}
 	}
 };
